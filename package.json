@@ -1,0 +1,14 @@
+{
+  "name": "freeflight-logbook",
+  "version": "1.0.0",
+  "description": "Free-flight logbook",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "slebetman@gmail.com",
+  "license": "BSD-2-Clause",
+  "dependencies": {
+    "less": "^2.7.2"
+  }
+}
