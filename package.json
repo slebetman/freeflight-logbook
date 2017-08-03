@@ -9,6 +9,11 @@
   "author": "slebetman@gmail.com",
   "license": "BSD-2-Clause",
   "dependencies": {
-    "less": "^2.7.2"
+    "bootstrap": "^3.3.7",
+    "browserify": "^14.4.0",
+    "handlebars": "^4.0.10",
+    "less": "^2.7.2",
+    "watchify": "^3.9.0",
+    "zepto": "^1.2.0"
   }
 }
