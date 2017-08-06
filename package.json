@@ -11,9 +11,13 @@
   "dependencies": {
     "bootstrap": "^3.3.7",
     "browserify": "^14.4.0",
+    "fastclick": "^1.0.6",
     "handlebars": "^4.0.10",
     "less": "^2.7.2",
-    "watchify": "^3.9.0",
-    "zepto": "^1.2.0"
+    "less-plugin-npm-import": "^2.1.0",
+    "mkdirp": "^0.5.1",
+    "ncp": "^2.0.0",
+    "ratchet-npm": "^2.0.4",
+    "watchify": "^3.9.0"
   }
 }
