@@ -2,6 +2,7 @@
 
 var fs = require('fs');
 var ncp = require('ncp').ncp;
+var copy = require('copy-newer');
 var mkdirp = require('mkdirp');
 var browserify = require('browserify');
 var less = require('less');
@@ -22,7 +23,7 @@ browserify([
 
 var css =
 	fs.readFileSync('./node_modules/ratchet-npm/dist/css/ratchet.min.css') +
-	fs.readFileSync('./src/css/index.css');
+	fs.readFileSync('./src/css/index.less');
 
 less.render(css.toString('utf8'),{}, function(err, output) {
 	if (err) {
@@ -33,11 +34,7 @@ less.render(css.toString('utf8'),{}, function(err, output) {
 	}
 })
 
-ncp('./src/index.html','./www/index.html',function (err) {
-	if (err) {
-		console.log(err);
-	}
-});
+copy('./*.html','./www/',{cwd:'./src'});
 
 ncp('./src/img','./www/img',function (err) {
 	if (err) {
