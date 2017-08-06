@@ -11,6 +11,7 @@ var NpmImportPlugin = require("less-plugin-npm-import");
 mkdirp.sync('./www/css');
 mkdirp.sync('./www/js');
 mkdirp.sync('./www/img');
+mkdirp.sync('./www/fonts');
 mkdirp.sync('./www/res');
 
 browserify([
@@ -50,3 +51,8 @@ ncp('./src/res','./www/res',function (err) {
 	}
 });
 
+ncp('./node_modules/ratchet-npm/dist/fonts','./www/fonts',function (err) {
+	if (err) {
+		console.log(err);
+	}
+});
