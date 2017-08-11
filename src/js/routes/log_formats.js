@@ -1,9 +1,5 @@
 var $ = require('jquery');
-
-function checkSelection (format_id) {
-	$('.selection span.icon').removeClass('icon-check');
-	$('.selection[data-format="' + format_id + '"] span.icon').addClass('icon-check');
-}
+var checkSelection = require('./lib/log_format_selection');
 
 module.exports = function (route, state) {
 	if (typeof state.selected_log_format == 'undefined') {
