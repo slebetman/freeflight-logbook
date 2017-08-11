@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+{{> lib/head }}
+<body>
+	<header class="bar bar-nav">
+		<a id="back" class="icon icon-left-nav pull-left" data-transition="slide-out"></a>
+		<h1 class="title">Log Formats</h1>
+	</header>
+	
+	<div class="content">
+		<ul class="table-view">
+			<li class="table-view-cell media">
+				<a class="selection">
+					<span class="media-object icon icon-check"></span>
+					Simple
+				</a>
+			</li>
+			<li class="table-view-cell media">
+				<a class="selection">
+					<span class="media-object icon"></span>
+					Glider
+				</a>
+			</li>
+			<li class="table-view-cell media">
+				<a class="selection">
+					<span class="media-object icon"></span>
+					FAI Competition
+				</a>
+			</li>
+		</ul>
+	</div>
+	
+	<div class="bar bar-standard bar-footer">
+		<a class="btn btn-primary pull-left" data-transition="slide-in">
+			<span class="icon icon-plus"></span>
+			Add Log Format
+		</a>
+	</div>
+	
+    {{> lib/footer }}
+</body>
+</html>

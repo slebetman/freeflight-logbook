@@ -10,10 +10,13 @@
   "license": "BSD-2-Clause",
   "dependencies": {
     "bootstrap": "^3.3.7",
+    "brick": "^2.0.0",
     "browserify": "^14.4.0",
     "copy-newer": "^2.1.2",
     "fastclick": "^1.0.6",
     "handlebars": "^4.0.10",
+    "handlebars-generator": "^3.1.1",
+    "jquery": "^3.2.1",
     "less": "^2.7.2",
     "less-plugin-npm-import": "^2.1.0",
     "mkdirp": "^0.5.1",

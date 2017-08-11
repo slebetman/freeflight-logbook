@@ -2,12 +2,12 @@
 
 var fs = require('fs');
 var ncp = require('ncp').ncp;
-var copy = require('copy-newer');
 var mkdirp = require('mkdirp');
 var browserify = require('browserify');
 var less = require('less');
 var ratchet = require('ratchet-npm');
 var NpmImportPlugin = require("less-plugin-npm-import");
+var HBS = require('handlebars-generator');
 
 mkdirp.sync('./www/css');
 mkdirp.sync('./www/js');
@@ -27,29 +27,33 @@ var css =
 
 less.render(css.toString('utf8'),{}, function(err, output) {
 	if (err) {
-		console.log(err);
+		console.error(err);
 	}
 	else {
 		fs.writeFileSync('./www/css/index.css',output.css);
 	}
-})
+});
 
-copy('./*.html','./www/',{cwd:'./src'});
+HBS.generateSite('src/templates','www').then(
+function(){},
+function(err){
+	console.error(err);
+});
 
 ncp('./src/img','./www/img',function (err) {
 	if (err) {
-		console.log(err);
+		console.error(err);
 	}
 });
 
 ncp('./src/res','./www/res',function (err) {
 	if (err) {
-		console.log(err);
+		console.error(err);
 	}
 });
 
 ncp('./node_modules/ratchet-npm/dist/fonts','./www/fonts',function (err) {
 	if (err) {
-		console.log(err);
+		console.error(err);
 	}
 });

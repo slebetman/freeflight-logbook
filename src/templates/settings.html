@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+{{> lib/head }}
+<body>
+	<header class="bar bar-nav">
+		<a class="icon icon-left-nav pull-left" href="./index.html" data-transition="slide-out"></a>
+		<h1 class="title">Settings</h1>
+	</header>
+	
+	<div class="content">
+		<div class="card">
+			<form>
+				<ul class="table-view">
+					<li class="table-view-cell media">
+						<a class="navigate-right" href="./log_formats.html" data-transition="slide-in">
+							Default Log Format
+						</a>
+					</li>
+					<li class="table-view-cell media">
+						<a class="navigate-right">
+							Default Unit
+						</a>
+					</li>
+				</ul>
+			</form>
+		</div>
+	</div>
+	
+	<div class="bar bar-standard bar-footer">
+		<a class="btn btn-positive pull-left" data-transition="slide-out">Save</a>
+	</div>
+	
+    {{> lib/footer }}
+</body>
+</html>
