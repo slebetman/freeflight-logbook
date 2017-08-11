@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+{{> lib/head }}
+<body>
+	<header class="bar bar-nav">
+		<a class="icon icon-left-nav pull-left" href="./index.html"  data-transition="slide-out"></a>
+		<h1 class="title">Add Model</h1>
+	</header>
+	
+	<div class="content">
+		<div class="card">
+			<form>
+				<ul class="table-view">
+					<li class="table-view-cell media">
+						<a class="navigate-right" href="./log_formats.html" data-transition="slide-in">
+							Log Format
+						</a>
+					</li>
+					<li class="table-view-cell media input">
+						<label for="name">Name</label>
+						<input name="name" type="text">
+					</li>
+					<li class="table-view-cell media input">
+						<label for="notes">Notes</label>
+						<textarea name="notes" rows="5"></textarea>
+					</li>
+				</ul>
+			</form>
+		</div>
+	</div>
+	
+	<div class="bar bar-standard bar-footer">
+		<a class="btn btn-positive pull-left" data-transition="slide-out">Save</a>
+		<a class="icon icon-gear pull-right" href="./settings.html" data-transition="slide-in"></a>
+	</div>
+	
+    {{> lib/footer }}
+</body>
+</html>
