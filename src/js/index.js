@@ -25,8 +25,10 @@ var app = {
         app.receivedEvent('deviceready');
 		window.addEventListener('push', function (e) {
 			var pushUrl = url.parse(e.detail.state.url);
-			var path = pushUrl.pathname.replace(/.html$/,'');
-			console.log(path);
+			var path = pushUrl.pathname
+				.replace(/.html$/,'')
+				.replace(/.*\//,'/');
+			console.log('PATH:' + path);
 			
 			if (route[path]) {
 				route[path](pushUrl,state);
