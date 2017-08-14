@@ -1,6 +1,7 @@
 var ratchet = require('ratchet-npm/dist/js/ratchet');
 var attachFastClick = require('fastclick');
 var url = require('url');
+var db = require('./db');
 
 var state = {
 	previousPage: '',
@@ -13,6 +14,31 @@ var route = {
 	'/log_formats': require('./routes/log_formats')
 }
 
+var loadingStage = 0;
+
+db.init(function(){
+	loadingStage++;
+	if (loadingStage >= 2) {
+		loaded();
+	}
+});
+
+function loaded () {
+	attachFastClick(document.body);
+	app.receivedEvent('deviceready');
+	window.addEventListener('push', function (e) {
+		var pushUrl = url.parse(e.detail.state.url);
+		var path = pushUrl.pathname
+			.replace(/.html$/,'')
+			.replace(/.*\//,'/');
+		console.log('PATH:' + path);
+		
+		if (route[path]) {
+			route[path](pushUrl,state);
+		}
+	});
+}
+
 var app = {
     initialize: function() {
         this.bindEvents();
@@ -21,19 +47,10 @@ var app = {
         document.addEventListener('deviceready', this.onDeviceReady, false);
     },
     onDeviceReady: function() {
-		attachFastClick(document.body);
-        app.receivedEvent('deviceready');
-		window.addEventListener('push', function (e) {
-			var pushUrl = url.parse(e.detail.state.url);
-			var path = pushUrl.pathname
-				.replace(/.html$/,'')
-				.replace(/.*\//,'/');
-			console.log('PATH:' + path);
-			
-			if (route[path]) {
-				route[path](pushUrl,state);
-			}
-		});
+		loadingStage++;
+		if (loadingStage >= 2) {
+			loaded();
+		}
     },
     receivedEvent: function(id) {
         
