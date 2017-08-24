@@ -59,9 +59,9 @@ var formats = [
 	}
 ]
 
-var DB = null;
+window.DB = null;
 
-module.exports = {
+var tables = {
 	setDB: function (db) {
 		DB = db;
 	},
@@ -71,16 +71,17 @@ module.exports = {
 				name TEXT,
 				notes TEXT,
 				picture TEXT,
-				meta TEXT,
+				meta TEXT
 			)`);
 			ctx.executeSql(`CREATE TABLE IF NOT EXISTS log_format (
 				name TEXT,
 				meta TEXT
 			)`,[],function(ctx, result){
-				ctx.executeSql('SELECT count(rowid) as count from log_format',[],
+				ctx.executeSql('SELECT count(rowid) as c from log_format',[],
 					function(ctx, result) {
-						if (result[0].count <= 0) {
-							this.initLogFormat(ctx);
+						console.log(result);
+						if (result.rows[0].c <= 0) {
+							tables.initLogFormat(ctx);
 						}
 					}
 				);
@@ -211,3 +212,5 @@ module.exports = {
 		});
 	}
 }
+
+module.exports = tables;
