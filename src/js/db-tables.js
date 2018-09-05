@@ -66,7 +66,9 @@ var tables = {
 		DB = db;
 	},
 	init: function (callback) {
+		console.log('init db');
 		DB.transaction(function(ctx){
+			console.log('inside transaction');
 			ctx.executeSql(`CREATE TABLE IF NOT EXISTS model (
 				name TEXT,
 				notes TEXT,
@@ -77,11 +79,16 @@ var tables = {
 				name TEXT,
 				meta TEXT
 			)`,[],function(ctx, result){
+				console.log('created log_format');
 				ctx.executeSql('SELECT count(rowid) as c from log_format',[],
 					function(ctx, result) {
 						console.log(result);
 						if (result.rows[0].c <= 0) {
+							console.log('Initialize LogFormat')
 							tables.initLogFormat(ctx);
+						}
+						else {
+							console.log('..');
 						}
 					}
 				);
@@ -112,6 +119,7 @@ var tables = {
 		},
 		function(err){
 			alert('Error processing SQL: '+err.code);
+			console.log(err);
 			callback(err);
 		},
 		function(){
@@ -120,12 +128,12 @@ var tables = {
 	},
 	initLogFormat: function (ctx) {
 		formats.forEach(function(f){
-			ctx.executeSql(
-				brick('INSERT INTO log_format VALUES (?,?)',
-					f.name,
-					JSON.stringify(f.meta)
-				)
-			);
+			var q = brick('INSERT INTO log_format VALUES (?,?)',
+				f.name,
+				JSON.stringify(f.meta)
+			).build();
+			console.log(q.text);
+			ctx.executeSql(q.text,q.params);
 		});
 	},
 	models: function (callback) {
