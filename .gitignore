@@ -1,3 +1,6 @@
 www
 node_modules
-platforms
+platforms/android/assets/www
+platforms/browser/www
+platforms/ios/www
+!plugins/*/www
