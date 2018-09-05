@@ -3,4 +3,5 @@ node_modules
 platforms/android/assets/www
 platforms/browser/www
 platforms/ios/www
+platforms/*/build
 !plugins/*/www
