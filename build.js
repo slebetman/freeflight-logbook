@@ -1,13 +1,13 @@
 #! /usr/bin/env node
 
 var fs = require('fs');
-var ncp = require('ncp').ncp;
 var mkdirp = require('mkdirp');
 var browserify = require('browserify');
 var less = require('less');
 var ratchet = require('ratchet-npm');
 var NpmImportPlugin = require("less-plugin-npm-import");
 var HBS = require('handlebars-generator');
+var copy = require('copy-newer');
 
 mkdirp.sync('./www/css');
 mkdirp.sync('./www/js');
@@ -22,8 +22,8 @@ browserify([
 ));
 
 var css =
-	fs.readFileSync('./node_modules/ratchet-npm/dist/css/ratchet.min.css') +
-	fs.readFileSync('./src/css/index.less');
+	fs.readFileSync('./node_modules/ratchet-npm/dist/css/ratchet.min.css','utf8') +
+	fs.readFileSync('./src/css/index.less','utf8');
 
 less.render(css.toString('utf8'),{}, function(err, output) {
 	if (err) {
@@ -40,20 +40,22 @@ function(err){
 	console.error(err);
 });
 
-ncp('./src/img','./www/img',function (err) {
-	if (err) {
-		console.error(err);
-	}
-});
+function log (x) {console.log(x)};
 
-ncp('./src/res','./www/res',function (err) {
-	if (err) {
-		console.error(err);
-	}
-});
+copy('**','./www/img',{
+	cwd: './src/img',
+	verbose: false
+})
+.then(()=>{}).catch(log);
 
-ncp('./node_modules/ratchet-npm/dist/fonts','./www/fonts',function (err) {
-	if (err) {
-		console.error(err);
-	}
-});
+copy('**','./www/res',{
+	cwd: './src/res',
+	verbose: false
+})
+.then(()=>{}).catch(log);
+
+copy('**','./www/fonts',{
+	cwd: './node_modules/ratchet-npm/dist/fonts',
+	verbose: false
+})
+.then(()=>{}).catch(log);
