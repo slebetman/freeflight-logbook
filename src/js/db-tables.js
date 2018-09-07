@@ -20,204 +20,48 @@ function i (ctx, callback, query) {
 	});
 }
 
-var formats = [
-	{
-		name: 'Simple',
-		meta: {
-			fields: [
-				'duration',
-				'location',
-				'windings',
-				'rubber_length',
-				'rubber_width',
-				'notes'
-			]
-		}
-	},
-	{
-		name: 'Glider',
-		meta: {
-			fields: [
-				'duration',
-				'location',
-				'notes'
-			]
-		}
-	},
-	{
-		name: 'Torque',
-		meta: {
-			fields: [
-				'duration',
-				'location',
-				'torque',
-				'rubber_length',
-				'rubber_width',
-				'notes'
-			]
-		}
-	}
-]
-
 window.DB = null;
+
+var tableList = [
+	'model',
+	'log_format',
+	'settings',
+	'location',
+	'log'
+]
+.map(function(t){
+	return require(t)(q,i);
+});
 
 var tables = {
 	setDB: function (db) {
 		DB = db;
+	}
+}
+
+tables.init = function (callback) {
+	console.log('init db');
+	
+	DB.transaction(function(ctx){
+		console.log('inside transaction');
+		
+		for (var i=0; i<tableList.length; i++) {
+			tableList[i].create(ctx);
+		}
 	},
-	init: function (callback) {
-		console.log('init db');
-		DB.transaction(function(ctx){
-			console.log('inside transaction');
-			ctx.executeSql(`CREATE TABLE IF NOT EXISTS model (
-				name TEXT,
-				notes TEXT,
-				picture TEXT,
-				meta TEXT
-			)`);
-			ctx.executeSql(`CREATE TABLE IF NOT EXISTS log_format (
-				name TEXT,
-				meta TEXT
-			)`,[],function(ctx, result){
-				console.log('created log_format');
-				ctx.executeSql('SELECT count(rowid) as c from log_format',[],
-					function(ctx, result) {
-						console.log(result);
-						if (result.rows[0].c <= 0) {
-							console.log('Initialize LogFormat')
-							tables.initLogFormat(ctx);
-						}
-						else {
-							console.log('..');
-						}
-					}
-				);
-			});
-			ctx.executeSql(`CREATE TABLE IF NOT EXISTS location (
-				name TEXT,
-				notes TEXT,
-				picture TEXT
-			)`);
-			ctx.executeSql(`CREATE TABLE IF NOT EXISTS log (
-				model INTEGER,
-				timestamp INTEGER,
-				duration INTEGER,
-				distance INTEGER,
-				distance_unit TEXT,
-				location INTEGER,
-				windings INTEGER,
-				backoff INTEGER,
-				torque DOUBLE,
-				torque_unit TEXT,
-				rubber_length DOUBLE,
-				rubber_length_unit TEXT,
-				rubber_width DOUBLE,
-				rubber_width_unit TEXT,
-				notes TEXT
-			)`);
-			
-		},
-		function(err){
-			alert('Error processing SQL: '+err.code);
-			console.log(err);
-			callback(err);
-		},
-		function(){
-			callback();
-		});
+	function(err){
+		alert('Error processing SQL: '+err.code);
+		console.log(err);
+		callback(err);
 	},
-	initLogFormat: function (ctx) {
-		formats.forEach(function(f){
-			var q = brick('INSERT INTO log_format VALUES (?,?)',
-				f.name,
-				JSON.stringify(f.meta)
-			).build();
-			console.log(q.text);
-			ctx.executeSql(q.text,q.params);
-		});
-	},
-	models: function (callback) {
-		DB.transaction(function(ctx){
-			q(ctx,callback,
-				'SELECT rowid, * FORM model'
-			);
-		});
-	},
-	addModel: function (data, callback) {
-		DB.transaction(function(ctx){
-			i(ctx, callback,
-				brick('INSERT INTO model VALUES (?,?,?,?)',
-					data.name,
-					data.notes,
-					data.picture,
-					data.meta
-				)
-			);
-		});
-	},
-	logs: function (model_id, callback) {
-		DB.transaction(function(ctx){
-			q(ctx, callback,brick(`
-				SELECT
-					log.rowid,
-					log.*, 
-					location.name as location, 
-					location.id as location_id
-				FORM log
-				JOIN location on location.id = log.location
-					where log.model = ?
-				`,
-				model_id
-			));
-		});
-	},
-	addLog: function (data, callback) {
-		DB.transaction(function(ctx){
-			i(ctx, callback,
-				brick('INSERT INTO log VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
-					data.model,
-					data.timestamp,
-					data.duration,
-					data.distance,
-					data.distance_unit,
-					data.location,
-					data.windings,
-					data.backoff,
-					data.torque,
-					data.torque_unit,
-					data.rubber_length,
-					data.rubber_length_unit,
-					data.rubber_width,
-					data.rubber_width_unit,
-					data.notes
-				)
-			);
-		});
-	},
-	locations: function (callback) {
-		DB.transaction(function(ctx){
-			q(ctx,callback,
-				'SELECT rowid, * FROM location'
-			);
-		});
-	},
-	addLocation: function (data, callback) {
-		DB.transaction(function(ctx){
-			i(ctx, callback,
-				brick('INSERT INTO location VALUES (?,?,?)',
-					data.name,
-					data.notes,
-					data.picture
-				)
-			);
-		});
-	},
-	log_formats: function (callback) {
-		DB.transaction(function(ctx){
-			q(ctx,callback,
-				'SELECT rowid, * FROM log_format'
-			);
-		});
+	function(){
+		callback();
+	});
+});
+
+for (var i=0; i<tableList.length; i++) {
+	for (var m in tableList[i].methods) {
+		tables[m] = tableList[i].methods[m];
 	}
 }
 
