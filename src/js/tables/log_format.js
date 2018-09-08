@@ -1,43 +1,6 @@
 var brick = require('brick');
-
-var formats = [
-	{
-		name: 'Simple',
-		meta: {
-			fields: [
-				'duration',
-				'location',
-				'windings',
-				'rubber_length',
-				'rubber_width',
-				'notes'
-			]
-		}
-	},
-	{
-		name: 'Glider',
-		meta: {
-			fields: [
-				'duration',
-				'location',
-				'notes'
-			]
-		}
-	},
-	{
-		name: 'Torque',
-		meta: {
-			fields: [
-				'duration',
-				'location',
-				'torque',
-				'rubber_length',
-				'rubber_width',
-				'notes'
-			]
-		}
-	}
-];
+var formats = require('./lib/built_in_log_formats.json');
+var flatten = require('./lib/flatten');
 
 module.exports = function (DB,q,i) {
 	
@@ -89,6 +52,13 @@ module.exports = function (DB,q,i) {
 				DB.transaction(function(ctx){
 					q(ctx,unpackLogFormat(callback),
 						'SELECT rowid, * FROM log_format'
+					);
+				});
+			},
+			getFormatName: function (rowid, callback) {
+				DB.transaction(function(ctx){
+					q(ctx,flatten('name',callback),
+						brick('SELECT name FROM log_format where rowid = ?',rowid)
 					);
 				});
 			}

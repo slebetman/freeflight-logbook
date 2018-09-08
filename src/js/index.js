@@ -31,11 +31,12 @@ function loaded () {
 		var path = pushUrl.pathname
 			.replace(/.html$/,'')
 			.replace(/.*\//,'/');
-		console.log('PATH:' + path);
-		
+			
 		if (route[path]) {
 			route[path](pushUrl,state);
 		}
+		
+		console.log('PATH:' + path);
 	});
 }
 
