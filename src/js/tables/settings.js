@@ -1,4 +1,5 @@
 var brick = require('brick');
+var flatten = require('./lib/flatten');
 
 var settings = [
 	{
@@ -70,7 +71,7 @@ module.exports = function (DB,q,i) {
 			},
 			getSetting: function (name,callback) {
 				DB.transaction(function(ctx){
-					q(ctx,callback,
+					q(ctx,flatten('value',callback),
 						brick('SELECT value FROM settings WHERE name = ?',name)
 					);
 				});

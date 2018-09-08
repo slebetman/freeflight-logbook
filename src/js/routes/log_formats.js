@@ -4,8 +4,7 @@ var db = require('../db');
 var page = require('../../templates/log_formats');
 
 function loadSelectedFormat (from, state, callback) {
-	db.getSetting('defaultFormat', result => {
-		var defaultFormat = result[0].value;
+	db.getSetting('defaultFormat', defaultFormat => {
 		switch (from) {
 			case '/settings':
 				callback(defaultFormat);
@@ -28,12 +27,12 @@ function loadSelectedFormat (from, state, callback) {
 	});
 }
 
-function saveSelectedFormat (from, state, callback) {
-	var selected = $(this).data('format');
+function saveSelectedFormat (selected, from, state, callback) {	
+	console.log(selected);
 	
 	switch (from) {
 		case '/settings':
-			db.setSetting('defaultFormat',selected,callback);
+			db.setSetting('defaultFormat',selected.toString(),callback);
 			break;
 		case '/add_model':
 			state.selected_log_format = selected;
@@ -67,8 +66,9 @@ module.exports = function (route, state) {
 			});
 			
 			$('.selection').click(function(){
-				saveSelectedFormat(from, state, function(){
-					checkSelection(state.selected_log_format);
+				var selected = $(this).data('format');
+				saveSelectedFormat(selected, from, state, function(){
+					checkSelection(selected);
 				});
 			});
 		});

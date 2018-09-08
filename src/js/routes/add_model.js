@@ -1,10 +1,5 @@
 var $ = require('jquery');
-
-var formats = [
-	'Simple',
-	'Glider',
-	'FAI Competition'
-];
+var db = require('../db');
 
 module.exports = function (route, state) {
 	if (typeof state.selected_log_format == 'undefined') {
@@ -13,5 +8,20 @@ module.exports = function (route, state) {
 
 	state.previousPage = route.pathname;
 	
-	$('.log-format').html(formats[state.selected_log_format]);
+	console.log(state);
+	
+	db.getSetting('defaultFormat', defaultFormat => {
+		if (!state.selected_log_format) {
+			state.selected_log_format = defaultFormat;
+		}
+	
+		db.getFormatName(state.selected_log_format, name => {
+			$('.log-format').html(name);
+		});
+		
+		$('#back').click(function(){
+			console.log('back button');
+			state.selected_log_format = undefined;
+		});
+	});
 }
