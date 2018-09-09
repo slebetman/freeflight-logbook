@@ -9,7 +9,7 @@ module.exports = {
 		var list = options.map(opt => {
 			return `	
 			<li class="table-view-cell media">
-				<a class="selection" data-format="${opt}">
+				<a class="selection" data-setting="${opt}">
 					<span class="media-object icon"></span>
 					${opt}
 				</a>
