@@ -8,15 +8,15 @@ var settings = [
 	},
 	{
 		name: 'unitLength',
-		value: 'inch'
+		value: 'in'
 	},
 	{
 		name: 'unitWeight',
-		value: 'grams'
+		value: 'g'
 	},
 	{
 		name: 'unitTorque',
-		value: 'grams cm'
+		value: 'g cm'
 	}
 ];
 

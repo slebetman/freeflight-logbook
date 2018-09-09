@@ -17,4 +17,9 @@ module.exports = function (route, state) {
 		$('.unit-weight').html(settings.unitWeight);
 		$('.unit-torque').html(settings.unitTorque);
 	});
+	
+	$('.setting_link').click(function(){
+		state.setting = $(this).data('settingname');
+		console.log('setting='+state.setting);
+	});
 }

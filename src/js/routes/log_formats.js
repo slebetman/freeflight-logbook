@@ -1,5 +1,5 @@
 var $ = require('jquery');
-var checkSelection = require('./lib/log_format_selection');
+var checkSelection = require('./lib/check_selection')('log');
 var db = require('../db');
 var page = require('../../templates/log_formats');
 
