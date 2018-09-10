@@ -1,7 +1,7 @@
 var $ = require('jquery');
 
 var types = {
-	log_format: function(item) {
+	log: function(item) {
 		return '.selection[data-format="' + item + '"] span.icon'
 	},
 	general: function(item) {
