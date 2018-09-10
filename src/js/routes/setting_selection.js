@@ -2,6 +2,7 @@ var $ = require('jquery');
 var checkSelection = require('./lib/check_selection')('general');
 var db = require('../db');
 var page = require('../../templates/setting_selection');
+var onclick = require('./lib/onclick');
 
 // Settings selection
 
@@ -33,12 +34,12 @@ module.exports = function (route, state) {
 	db.getSetting(settingName, value => {
 		checkSelection(value);
 		
-		$('#back').click(function(){
+		onclick('#back', function(){
 			console.log('back button');
 			state.push({url: state.previousPage, transition: 'slide-out'});
 		});
 		
-		$('.selection').click(function(){
+		onclick('.selection', function(){
 			var selected = $(this).data('setting');
 			db.setSetting(settingName, selected, function(){
 				checkSelection(selected);

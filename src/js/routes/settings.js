@@ -1,8 +1,11 @@
 var $ = require('jquery');
 var db = require('../db');
 var page = require('../../templates/settings');
+var onclick = require('./lib/onclick');
 
 module.exports = function (route, state) {
+	console.log('SETTINGS CONTROLLER');
+
 	if (typeof state.selected_log_format == 'undefined') {
 		state.selected_log_format = 0;
 	}
@@ -18,7 +21,7 @@ module.exports = function (route, state) {
 		$('.unit-torque').html(settings.unitTorque);
 	});
 	
-	$('.setting_link').click(function(){
+	onclick('.setting_link', function(){
 		state.setting = $(this).data('settingname');
 		console.log('setting='+state.setting);
 	});

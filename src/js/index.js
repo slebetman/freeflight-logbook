@@ -2,6 +2,7 @@ var ratchet = require('ratchet-npm/dist/js/ratchet');
 var attachFastClick = require('fastclick');
 var url = require('url');
 var db = require('./db');
+var $ = require('jquery');
 
 var state = {
 	previousPage: '',
@@ -26,8 +27,7 @@ db.init(function(){
 
 function loaded () {
 	attachFastClick(document.body);
-	app.receivedEvent('deviceready');
-	window.addEventListener('push', function (e) {
+	$(window).on('push', function (e) {
 		var pushUrl = url.parse(e.detail.state.url);
 		var path = pushUrl.pathname
 			.replace(/.html$/,'')
@@ -38,6 +38,16 @@ function loaded () {
 		}
 		
 		console.log('PATH:' + path);
+		
+		// Fix non-responsive input on mobile:
+		$('input[type="text"]').on('touchstart',function(){
+			$(this).focus();
+		});
+		
+		// Fix non-responsive textarea on mobile: 
+		$('textarea').on('touchstart',function(){
+			$(this).focus();
+		});
 	});
 }
 
@@ -53,9 +63,6 @@ var app = {
 		if (loadingStage >= 2) {
 			loaded();
 		}
-    },
-    receivedEvent: function(id) {
-        
     }
 };
 

@@ -1,7 +1,10 @@
 var $ = require('jquery');
 var db = require('../db');
+var onclick = require('./lib/onclick');
 
 module.exports = function (route, state) {
+	console.log('ADD MODEL CONTROLLER');
+
 	if (typeof state.selected_log_format == 'undefined') {
 		state.selected_log_format = 0;
 	}
@@ -18,10 +21,10 @@ module.exports = function (route, state) {
 		db.getFormatName(state.selected_log_format, name => {
 			$('.log-format').html(name);
 		});
-		
-		$('#back').click(function(){
-			console.log('back button');
-			state.selected_log_format = undefined;
-		});
+	});
+	
+	onclick('#back', function(){
+		console.log('back button');
+		state.selected_log_format = undefined;
 	});
 }

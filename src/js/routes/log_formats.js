@@ -2,6 +2,7 @@ var $ = require('jquery');
 var checkSelection = require('./lib/check_selection')('log');
 var db = require('../db');
 var page = require('../../templates/log_formats');
+var onclick = require('./lib/onclick');
 
 function loadSelectedFormat (from, state, callback) {
 	db.getSetting('defaultFormat', defaultFormat => {
@@ -60,12 +61,12 @@ module.exports = function (route, state) {
 		loadSelectedFormat(from, state, selectedFormat => {
 			checkSelection(selectedFormat);
 			
-			$('#back').click(function(){
+			onclick('#back', function(){
 				console.log('back button');
 				state.push({url: state.previousPage, transition: 'slide-out'});
 			});
 			
-			$('.selection').click(function(){
+			onclick('.selection', function(){
 				var selected = $(this).data('format');
 				saveSelectedFormat(selected, from, state, function(){
 					checkSelection(selected);
