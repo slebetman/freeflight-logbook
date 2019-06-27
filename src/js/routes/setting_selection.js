@@ -9,15 +9,15 @@ var onclick = require('./lib/onclick');
 var choices = {
 	unitLength: {
 		title: 'Length Units',
-		list: ['cm', 'in']
+		list: ['cm', 'in', 'm']
 	},
 	unitWeight:  {
 		title: 'Weight Units',
-		list: ['g','lb']
+		list: ['g','oz','lb']
 	},
 	unitTorque:  {
 		title: 'Torque Units',
-		list: ['g cm', 'lb in', 'g in']
+		list: ['g cm', 'oz in', 'lb in']
 	}
 }
 
@@ -36,7 +36,7 @@ module.exports = function (route, state) {
 		
 		onclick('#back', function(){
 			console.log('back button');
-			state.push({url: state.previousPage, transition: 'slide-out'});
+			history.back();
 		});
 		
 		onclick('.selection', function(){

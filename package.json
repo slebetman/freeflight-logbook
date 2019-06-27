@@ -10,18 +10,18 @@
     "repository": "git@github.com:slebetman/freeflight-logbook.git",
     "license": "BSD-2-Clause",
     "dependencies": {
-        "bootstrap": "^3.3.7",
+        "bootstrap": "^3.4.1",
         "brick": "^2.0.0",
         "browserify": "^14.4.0",
         "copy-newer": "^2.1.2",
         "fastclick": "^1.0.6",
-        "handlebars": "^4.0.10",
-        "handlebars-generator": "^3.1.1",
-        "jquery": "^3.2.1",
-        "less": "^3.8.1",
+        "handlebars": "^4.1.2",
+        "handlebars-generator": "^3.2.3",
+        "jquery": "^3.4.1",
+        "less": "^3.9.0",
         "less-plugin-npm-import": "^2.1.0",
         "mkdirp": "^0.5.1",
         "ratchet-npm": "^2.0.4",
-        "watchify": "^3.11.0"
+        "watchify": "^3.11.1"
     }
 }

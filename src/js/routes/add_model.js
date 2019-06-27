@@ -1,6 +1,7 @@
 var $ = require('jquery');
 var db = require('../db');
 var onclick = require('./lib/onclick');
+var page = require('../../templates/add_model');
 
 module.exports = function (route, state) {
 	console.log('ADD MODEL CONTROLLER');
@@ -26,5 +27,10 @@ module.exports = function (route, state) {
 	onclick('#back', function(){
 		console.log('back button');
 		state.selected_log_format = undefined;
+		history.back();
+	});
+	
+	page.handleSaveButton(function(){
+		var model = page.getValues();
 	});
 }

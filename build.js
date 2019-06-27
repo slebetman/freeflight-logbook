@@ -17,7 +17,8 @@ mkdirp.sync('./www/res');
 
 browserify([
 	'./src/js/index.js'
-]).bundle().pipe(fs.createWriteStream(
+])
+.bundle().pipe(fs.createWriteStream(
 	'./www/js/index.js'
 ));
 

@@ -63,7 +63,7 @@ module.exports = function (route, state) {
 			
 			onclick('#back', function(){
 				console.log('back button');
-				state.push({url: state.previousPage, transition: 'slide-out'});
+				history.back();
 			});
 			
 			onclick('.selection', function(){
