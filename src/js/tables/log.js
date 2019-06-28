@@ -3,6 +3,7 @@ var brick = require('brick');
 module.exports = function (DB,q,i) {
 	
 	return {
+		name: 'log',
 		create: function (ctx) {
 			ctx.executeSql(`CREATE TABLE IF NOT EXISTS log (
 				model INTEGER,

@@ -12,6 +12,7 @@ function unpackMeta (callback) {
 module.exports = function (DB,q,i) {
 	
 	return {
+		name: 'model',
 		create: function (ctx) {
 			ctx.executeSql(`CREATE TABLE IF NOT EXISTS model (
 				name TEXT,

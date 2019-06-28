@@ -20,9 +20,9 @@ module.exports = function (DB,q,i) {
 			var ret = [];
 			for (var i=0; i<result.length; i++) {
 				ret.push({
-					rowid: result[i].rowid,
-					name: result[i].name,
-					meta: JSON.parse(result[i].meta)
+					rowid: result.item(i).rowid,
+					name: result.item(i).name,
+					meta: JSON.parse(result.item(i).meta)
 				});
 			}
 			callback(ret);
@@ -30,6 +30,7 @@ module.exports = function (DB,q,i) {
 	}
 	
 	return {
+		name: 'log_format',
 		create: function (ctx) {
 			ctx.executeSql(`CREATE TABLE IF NOT EXISTS log_format (
 				name TEXT,
@@ -38,13 +39,20 @@ module.exports = function (DB,q,i) {
 				console.log('created log_format');
 				ctx.executeSql('SELECT count(rowid) as c from log_format',[],
 					function(ctx, result) {
-						console.log(result);
-						if (result.rows[0].c <= 0) {
+						console.log(JSON.stringify(result.rows.item(0),null,2));
+						if (result.rows.item(0).c <= 0) {
 							console.log('Initialize LogFormat')
 							initLogFormat(ctx);
 						}
+					},
+					function(err){
+						console.error('SELECT ERROR: ' + err.message);
+						return false;
 					}
 				);
+			},function(err){
+				console.error(err.message);
+				return false;
 			});
 		},
 		methods: {

@@ -37,13 +37,14 @@ module.exports = function (DB,q,i) {
 		return function (result) {
 			var ret = {};
 			for (i=0; i<result.length; i++) {
-				ret[result[i].name] = result[i].value;
+				ret[result.item(i).name] = result.item(i).value;
 			}
 			callback(ret);
 		}
 	}
 	
 	return {
+		name: 'settings',
 		create: function (ctx) {
 			ctx.executeSql(`CREATE TABLE IF NOT EXISTS settings (
 				name TEXT,
@@ -52,13 +53,20 @@ module.exports = function (DB,q,i) {
 				console.log('created settings');
 				ctx.executeSql('SELECT count(rowid) as c from settings',[],
 					function(ctx, result) {
-						console.log(result);
-						if (result.rows[0].c <= 0) {
+						console.log(JSON.stringify(result.rows.item(0),null,2));
+						if (result.rows.item(0).c <= 0) {
 							console.log('Initialize Settings')
 							initSettings(ctx);
 						}
+					},
+					function(err){
+						console.error('SELECT ERROR settings: ' + err.message);
+						return false;
 					}
 				);
+			},function(err){
+				console.error(err.message);
+				return false;
 			});
 		},
 		methods: {

@@ -16,15 +16,6 @@ var route = {
 	'/setting_selection': require('./routes/setting_selection')
 }
 
-var loadingStage = 0;
-
-db.init(function(){
-	loadingStage++;
-	if (loadingStage >= 2) {
-		loaded();
-	}
-});
-
 function loaded () {
 	attachFastClick(document.body);
 	$(window).on('push', function (e) {
@@ -61,10 +52,9 @@ var app = {
 		}
     },
     onDeviceReady: function() {
-		loadingStage++;
-		if (loadingStage >= 2) {
+		db.init(function(){
 			loaded();
-		}
+		});
     }
 };
 

@@ -54,13 +54,16 @@ tables.init = function (callback) {
 	DB.transaction(function(ctx){
 		console.log('inside transaction');
 		
+		console.log(tableList.map(x=>x.name).join(','));
+		
 		for (var i=0; i<tableList.length; i++) {
+			console.log('creating table ', tableList[i].name);
 			tableList[i].create(ctx);
 		}
 	},
 	function(err){
-		alert('Error processing SQL: '+err.code);
-		console.log(err);
+		alert('Error processing SQL: '+err.code+' - '+err.message);
+		console.error('error:',err.message);
 		callback(err);
 	},
 	function(){
