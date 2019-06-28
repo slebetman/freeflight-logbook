@@ -53,10 +53,12 @@ function loaded () {
 
 var app = {
     initialize: function() {
-        this.bindEvents();
-    },
-    bindEvents: function() {
-        document.addEventListener('deviceready', this.onDeviceReady, false);
+		if (document.URL.match(/^https?:/)) {
+			this.onDeviceReady();
+		}
+		else {
+        	document.addEventListener('deviceready', this.onDeviceReady, false);
+		}
     },
     onDeviceReady: function() {
 		loadingStage++;

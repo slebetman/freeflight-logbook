@@ -25,4 +25,8 @@ module.exports = function (route, state) {
 		state.setting = $(this).data('settingname');
 		console.log('setting='+state.setting);
 	});
+	
+	onclick('#back', function(){
+		window.history.back();
+	});
 }
