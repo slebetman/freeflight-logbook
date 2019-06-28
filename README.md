@@ -4,6 +4,15 @@ A PhoneGap Hello World template
 
 ## Usage
 
+First install phonegap:
+
+    npm install -g phonegap
+
+
+To install dependencies run:
+
+    phonegap prepare
+
 #### PhoneGap CLI
 
 The hello-world template is the default when you create a new application using the [phonegap-cli][phonegap-cli-url].
