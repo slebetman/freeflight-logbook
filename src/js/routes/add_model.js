@@ -1,5 +1,6 @@
 var $ = require('jquery');
 var db = require('../db');
+var alert = require('./lib/alert');
 var onclick = require('./lib/onclick');
 var page = require('../../templates/add_model');
 
@@ -23,14 +24,40 @@ module.exports = function (route, state) {
 			$('.log-format').html(name);
 		});
 	});
+
+	function goBack () {
+		state.selected_log_format = undefined;
+		history.back();
+	}
 	
 	onclick('#back', function(){
 		console.log('back button');
-		state.selected_log_format = undefined;
-		history.back();
+		goBack();
 	});
 	
 	page.handleSaveButton(function(){
+		console.log('save model');
+
 		var model = page.getValues();
+		console.log('log format=',state.selected_log_format);
+
+		if (model.name == "") {
+			alert.error('Please enter model name');
+		}
+		else {
+			db.getFormatById(state.selected_log_format, function(format) {
+				console.log('format=',format);
+
+				model.meta = {
+					fields: format.fields
+				};
+	
+				console.log('model=',model);
+
+				db.addModel(model,function(){
+					goBack();
+				});
+			});
+		}
 	});
 }

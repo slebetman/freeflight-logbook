@@ -32,7 +32,7 @@ module.exports = function (DB,q,i) {
 			addModel: function (data, callback) {
 				DB.transaction(function(ctx){
 					var meta = JSON.stringify(data.meta) || "{}";
-					i(ctx, callback,
+					q(ctx, callback,
 						brick('INSERT INTO model VALUES (?,?,?,?)',
 							data.name,
 							data.notes,

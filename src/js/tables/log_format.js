@@ -69,6 +69,15 @@ module.exports = function (DB,q,i) {
 						brick('SELECT name FROM log_format where rowid = ?',rowid)
 					);
 				});
+			},
+			getFormatById: function (rowid, callback) {
+				DB.transaction(function(ctx){
+					q(ctx,flatten('meta',function(meta){
+						callback(JSON.parse(meta));
+					}),
+						brick('SELECT meta FROM log_format where rowid = ?',rowid)
+					);
+				});
 			}
 		}
 	}

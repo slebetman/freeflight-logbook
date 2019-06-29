@@ -27,6 +27,6 @@ module.exports = function (route, state) {
 	});
 	
 	onclick('#back', function(){
-		window.history.back();
+		history.back();
 	});
 }
