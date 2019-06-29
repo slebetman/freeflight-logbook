@@ -1,7 +1,8 @@
 var brick = require('brick');
 
 function unpackMeta (callback) {
-	return function (rows) {
+	return function (results) {
+		var rows = [].slice.call(results);
 		callback(rows.map(x => {
 			x.meta = JSON.parse(x.meta);
 			return x;
@@ -25,14 +26,14 @@ module.exports = function (DB,q,i) {
 			models: function (callback) {
 				DB.transaction(function(ctx){
 					q(ctx,unpackMeta(callback),
-						'SELECT rowid, * FORM model'
+						'SELECT rowid, * FROM model'
 					);
 				});
 			},
 			addModel: function (data, callback) {
 				DB.transaction(function(ctx){
 					var meta = JSON.stringify(data.meta) || "{}";
-					q(ctx, callback,
+					i(ctx, callback,
 						brick('INSERT INTO model VALUES (?,?,?,?)',
 							data.name,
 							data.notes,

@@ -13,7 +13,8 @@ var route = {
 	'/add_model': require('./routes/add_model'),
 	'/settings': require('./routes/settings'),
 	'/log_formats': require('./routes/log_formats'),
-	'/setting_selection': require('./routes/setting_selection')
+	'/setting_selection': require('./routes/setting_selection'),
+	'/index': require('./routes/index')
 }
 
 function loaded () {
@@ -40,6 +41,8 @@ function loaded () {
 			$(this).focus();
 		});
 	});
+
+	route['/index']('',state); // Load landing page controller
 }
 
 var app = {

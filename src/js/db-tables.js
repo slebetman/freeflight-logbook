@@ -8,19 +8,26 @@ var brick = require('brick');
  * But how to support custom fields?
  */
 
-function q (ctx, callback, query) {
+function query (ctx, callback, query) {
 	var params = [];
 	if (query instanceof brick) {
 		params = query.params;
 		query = query.text;
 	}
 	console.log(query);
-	ctx.executeSql(query,params, function(ctx,result){
-		callback(result.rows);
-	});
+	ctx.executeSql(query,params,
+		function(ctx,result){
+			console.log(result);
+			callback(result.rows);
+		},
+		function(ctx,err){
+			console.error(err.message);
+			alert(err.message);
+		}
+	);
 }
 
-function i (ctx, callback, query) {
+function insert (ctx, callback, query) {
 	var params = [];
 	if (query instanceof brick) {
 		params = query.params;
@@ -44,11 +51,11 @@ tables.init = function (callback) {
 	console.log('init db');
 	
 	var tableList = [
-		require('./tables/model')(DB,q,i),
-		require('./tables/log_format')(DB,q,i),
-		require('./tables/settings')(DB,q,i),
-		require('./tables/location')(DB,q,i),
-		require('./tables/log')(DB,q,i)
+		require('./tables/model')(DB,query,insert),
+		require('./tables/log_format')(DB,query,insert),
+		require('./tables/settings')(DB,query,insert),
+		require('./tables/location')(DB,query,insert),
+		require('./tables/log')(DB,query,insert)
 	];
 	
 	DB.transaction(function(ctx){
