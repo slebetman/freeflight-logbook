@@ -19,8 +19,13 @@ module.exports = function (route, state) {
     db.models(function(models){
         console.log('got models', models);
 
-        $('.content').append(`
-            <pre>${JSON.stringify(models,null,2)}</pre>
-        `);
+        models.forEach(model => {
+            $('.content').append(`
+                <div data-id="${model.rowid}">
+                    <img src="${model.picture}" class="model-thumbnail">
+                    <span class="model-name">${model.name}</span>
+                </div>
+            `); 
+        });
     })
 }

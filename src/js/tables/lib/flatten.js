@@ -1,6 +1,6 @@
 function flatten (column, callback) {
 	return function (result) {
-		callback(result.item(0)[column]);
+		callback(result[0][column]);
 	}
 }
 

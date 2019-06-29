@@ -18,7 +18,13 @@ function query (ctx, callback, query) {
 	ctx.executeSql(query,params,
 		function(ctx,result){
 			console.log(result);
-			callback(result.rows);
+
+			var rows = [];
+			for (var i=0; i<result.rows.length; i++) {
+				rows.push(result.rows.item(i));
+			}
+
+			callback(rows);
 		},
 		function(ctx,err){
 			console.error(err.message);

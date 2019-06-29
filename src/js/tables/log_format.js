@@ -20,9 +20,9 @@ module.exports = function (DB,q,i) {
 			var ret = [];
 			for (var i=0; i<result.length; i++) {
 				ret.push({
-					rowid: result.item(i).rowid,
-					name: result.item(i).name,
-					meta: JSON.parse(result.item(i).meta)
+					rowid: result[i].rowid,
+					name: result[i].name,
+					meta: JSON.parse(result[i].meta)
 				});
 			}
 			callback(ret);

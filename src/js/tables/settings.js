@@ -37,7 +37,7 @@ module.exports = function (DB,q,i) {
 		return function (result) {
 			var ret = {};
 			for (i=0; i<result.length; i++) {
-				ret[result.item(i).name] = result.item(i).value;
+				ret[result[i].name] = result[i].value;
 			}
 			callback(ret);
 		}
