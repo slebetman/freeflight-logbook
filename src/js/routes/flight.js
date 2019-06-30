@@ -11,8 +11,17 @@ module.exports = function (route, state) {
 
     console.log('model', model);
 
+    state.previousPage = route.pathname;
+	
+	db.settings(settings => {
+		$('span.rubber_length_unit').html(settings.unitLength);
+        $('span.rubber_width_unit').html(settings.unitLength);
+		$('span.rubber_weight_unit').html(settings.unitWeight);
+		$('span.torque_unit').html(settings.unitTorque);
+	});
+
     model.meta.fields.forEach(function(f){
-        $(`li#${f}`).css({
+        $(`li.table-view-cell.${f}`).css({
             display: 'block'
         })
     });

@@ -37,13 +37,13 @@ function loaded () {
 		console.log('PATH:' + path);
 		
 		// Fix non-responsive input on mobile:
-		$('input[type="text"]').on('touchstart',function(){
-			$(this).focus();
+		$('input[type="text"]').on('touchstart',function(e){
+			$(e.target).focus();
 		});
 		
 		// Fix non-responsive textarea on mobile: 
-		$('textarea').on('touchstart',function(){
-			$(this).focus();
+		$('textarea').on('touchstart',function(e){
+			$(e.target).focus();
 		});
 	});
 

@@ -53,17 +53,21 @@ var tables = {
 	}
 }
 
+var tableList = null;
+
 tables.init = function (callback) {
 	console.log('init db');
 	
-	var tableList = [
-		require('./tables/model')(DB,query,insert),
-		require('./tables/log_format')(DB,query,insert),
-		require('./tables/settings')(DB,query,insert),
-		require('./tables/location')(DB,query,insert),
-		require('./tables/log')(DB,query,insert)
-	];
-	
+	if (tableList == null) {
+		tableList = [
+			require('./tables/model')(DB,query,insert),
+			require('./tables/log_format')(DB,query,insert),
+			require('./tables/settings')(DB,query,insert),
+			require('./tables/location')(DB,query,insert),
+			require('./tables/log')(DB,query,insert)
+		];
+	}
+
 	DB.transaction(function(ctx){
 		console.log('inside transaction');
 		
@@ -89,6 +93,26 @@ tables.init = function (callback) {
 		}
 	}
 };
+
+tables.clear = function (callback) {
+	DB.transaction(function(ctx){
+		console.log('inside transaction');
+		
+		for (var i=0; i<tableList.length; i++) {
+			var tableName = tableList[i].name;
+			console.log('deleting table ', tableName);
+			ctx.executeSql(`DROP TABLE ${tableName}`);
+		}
+	},
+	function(err){
+		alert('Error processing SQL: '+err.code+' - '+err.message);
+		console.error('error:',err.message);
+		callback(err);
+	},
+	function(){
+		callback();
+	});
+}
 
 window.TABLES = tables;
 module.exports = tables;

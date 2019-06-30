@@ -17,33 +17,61 @@
         <div class="card">
             <form id="new-flight">
                 <ul class="table-view">
-                    <li class="table-view-cell media" id="location">
+                    <li class="table-view-cell media location">
                         <a class="navigate-right" href="./locations.html" data-transition="slide-in">
                             Location
-                            <span class="log-format pull-right settings-text"></span>
+                            <span class="location pull-right settings-text"></span>
                         </a>
                     </li>
-                    <li class="table-view-cell media input" id="windings">
+                    <li class="table-view-cell media input windings">
                         <label for="name">Windings</label>
                         <input name="windings" type="text">
                     </li>
-                    <li class="table-view-cell media input" id="backoff">
+                    <li class="table-view-cell media input backoff">
                         <label for="name">Backoff</label>
                         <input name="backoff" type="text">
                     </li>
-                    <li class="table-view-cell media input" id="torque">
+                    <li class="table-view-cell media input torque">
                         <label for="name">Torque</label>
                         <input name="torque" type="text">
                     </li>
-                    <li class="table-view-cell media input" id="rubber_length">
+                    <li class="table-view-cell media torque">
+                        <a class="navigate-right" href="./locations.html" data-transition="slide-in">
+                            Torque Unit
+                            <span class="torque_unit pull-right settings-text"></span>
+                        </a>
+                    </li>
+                    <li class="table-view-cell media input rubber_length">
                         <label for="name">Rubber Length</label>
                         <input name="rubber_length" type="text">
                     </li>
-                    <li class="table-view-cell media input" id="rubber_width">
+                    <li class="table-view-cell media rubber_length">
+                        <a class="navigate-right" href="./locations.html" data-transition="slide-in">
+                            Rubber Length Unit
+                            <span class="rubber_length_unit pull-right settings-text"></span>
+                        </a>
+                    </li>
+                    <li class="table-view-cell media input rubber_width">
                         <label for="name">Rubber Width</label>
                         <input name="rubber_width" type="text">
                     </li>
-                    <li class="table-view-cell media input" id="notes">
+                    <li class="table-view-cell media rubber_width">
+                        <a class="navigate-right" href="./locations.html" data-transition="slide-in">
+                            Rubber Width Unit
+                            <span class="rubber_width_unit pull-right settings-text"></span>
+                        </a>
+                    </li>
+                    <li class="table-view-cell media input rubber_weight">
+                            <label for="name">Rubber Weight</label>
+                            <input name="rubber_weight" type="text">
+                        </li>
+                        <li class="table-view-cell media rubber_weight">
+                            <a class="navigate-right" href="./locations.html" data-transition="slide-in">
+                                Rubber Weight Unit
+                                <span class="rubber_weight_unit pull-right settings-text"></span>
+                            </a>
+                        </li>
+                    <li class="table-view-cell media input notes">
                         <label for="notes">Notes</label>
                         <textarea name="notes" rows="5"></textarea>
                     </li>

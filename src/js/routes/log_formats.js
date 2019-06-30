@@ -66,8 +66,8 @@ module.exports = function (route, state) {
 				history.back();
 			});
 			
-			onclick('.selection', function(){
-				var selected = $(this).data('format');
+			onclick('.selection', function(e){
+				var selected = $(e.target).data('format');
 				saveSelectedFormat(selected, from, state, function(){
 					checkSelection(selected);
 				});

@@ -1,5 +1,6 @@
 var $ = require('jquery');
 var db = require('../db');
+var alert = require('./lib/alert');
 var page = require('../../templates/settings');
 var onclick = require('./lib/onclick');
 
@@ -21,12 +22,31 @@ module.exports = function (route, state) {
 		$('.unit-torque').html(settings.unitTorque);
 	});
 	
-	onclick('.setting_link', function(){
-		state.setting = $(this).data('settingname');
+	onclick('.setting_link', function(e){
+		state.setting = $(e.target).data('settingname');
 		console.log('setting='+state.setting);
 	});
 	
 	onclick('#back', function(){
 		history.back();
+	});
+
+	onclick('#reset-db',function(){
+		navigator.notification.confirm(
+			'Are you sure you want to delete all your data? ' +
+			'This action cannot be undone!',
+			function(choice) {
+				console.log('choice', choice);
+				if (choice == 1) {
+					db.clear(function(){
+						console.log('cleared');
+						db.init(function(){
+							alert.info('Database cleared.',function(){});
+						});
+					});
+				}
+			},
+			'WARNING!'
+		);
 	});
 }

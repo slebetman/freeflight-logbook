@@ -39,8 +39,8 @@ module.exports = function (route, state) {
 			history.back();
 		});
 		
-		onclick('.selection', function(){
-			var selected = $(this).data('setting');
+		onclick('.selection', function(e){
+			var selected = $(e.target).data('setting');
 			db.setSetting(settingName, selected, function(){
 				checkSelection(selected);
 			});

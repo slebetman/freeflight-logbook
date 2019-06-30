@@ -58,6 +58,8 @@ module.exports = function (DB,q,i) {
 							data.rubber_length_unit,
 							data.rubber_width,
 							data.rubber_width_unit,
+							data.rubber_weight,
+							data.rubber_weight_unit,
 							data.notes
 						)
 					);
