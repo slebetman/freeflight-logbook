@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+{{> lib/head }}
+<body>
+	<header class="bar bar-nav">
+		<a class="icon icon-left-nav pull-left" 
+			data-transition="slide-out" 
+            id="back"
+            href="./model.html"
+		></a>
+		<h1 class="title">
+            New Flight
+        </h1>
+	</header>
+    
+	<div class="content">
+        <div class="card">
+            <form id="new-flight">
+                <ul class="table-view">
+                    <li class="table-view-cell media" id="location">
+                        <a class="navigate-right" href="./locations.html" data-transition="slide-in">
+                            Location
+                            <span class="log-format pull-right settings-text"></span>
+                        </a>
+                    </li>
+                    <li class="table-view-cell media input" id="windings">
+                        <label for="name">Windings</label>
+                        <input name="windings" type="text">
+                    </li>
+                    <li class="table-view-cell media input" id="backoff">
+                        <label for="name">Backoff</label>
+                        <input name="backoff" type="text">
+                    </li>
+                    <li class="table-view-cell media input" id="torque">
+                        <label for="name">Torque</label>
+                        <input name="torque" type="text">
+                    </li>
+                    <li class="table-view-cell media input" id="rubber_length">
+                        <label for="name">Rubber Length</label>
+                        <input name="rubber_length" type="text">
+                    </li>
+                    <li class="table-view-cell media input" id="rubber_width">
+                        <label for="name">Rubber Width</label>
+                        <input name="rubber_width" type="text">
+                    </li>
+                    <li class="table-view-cell media input" id="notes">
+                        <label for="notes">Notes</label>
+                        <textarea name="notes" rows="5"></textarea>
+                    </li>
+                </ul>
+            </form>
+        </div>
+    </div>
+    
+    <div class="bar bar-standard bar-footer">
+        <a class="btn btn-positive pull-left" 
+            href="./timer.html" 
+            data-transition="slide-in"
+            id="start-flight"
+        >
+            START
+            <span class="icon icon-play"></span>
+		</a>
+	</div>
+	
+    {{> lib/footer }}
+</body>
+</html>

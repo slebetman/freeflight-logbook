@@ -15,7 +15,9 @@ var route = {
 	'log_formats': require('./routes/log_formats'),
 	'setting_selection': require('./routes/setting_selection'),
 	'index': require('./routes/index'),
-	'model': require('./routes/model')
+	'model': require('./routes/model'),
+	'flight': require('./routes/flight'),
+	'timer': require('./routes/timer')
 }
 
 function loaded () {
