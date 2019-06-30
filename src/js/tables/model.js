@@ -42,6 +42,13 @@ module.exports = function (DB,q,i) {
 						)
 					);
 				});
+			},
+			deleteModelById: function (id, callback) {
+				DB.transaction(function(ctx){
+					q(ctx,callback,
+						brick('DELETE FROM model where rowid = ?', id)
+					);
+				});
 			}
 		}
 	}

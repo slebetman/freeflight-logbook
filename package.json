@@ -4,7 +4,8 @@
     "description": "Free-flight logbook",
     "main": "index.js",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "build": "./build.js"
     },
     "author": "slebetman@gmail.com",
     "repository": "git@github.com:slebetman/freeflight-logbook.git",
