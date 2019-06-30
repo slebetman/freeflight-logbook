@@ -2,6 +2,7 @@ var $ = require('jquery');
 var db = require('../db');
 var alert = require('./lib/alert');
 var onclick = require('./lib/onclick');
+var camera = require('./lib/camera');
 var page = require('../../templates/add_model');
 
 module.exports = function (route, state) {
@@ -27,12 +28,21 @@ module.exports = function (route, state) {
 
 	function goBack () {
 		state.selected_log_format = undefined;
-		history.back();
+		state.push({url:'index.html'});
 	}
 	
 	onclick('#back', function(e){
 		console.log('back button');
 		goBack();
+	});
+	
+	page.handlePictureUpload(function(){
+		camera.getPicture(function(img){
+			var url = 'data:image/jpeg;base64,' + img;
+			console.log(url);
+			$('.plane-pic').attr('src', url);
+			$('.click-instruction').hide();
+		});
 	});
 	
 	page.handleSaveButton(function(){

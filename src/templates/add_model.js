@@ -8,6 +8,7 @@ module.exports = {
 	},
 	handlePictureUpload: function (callback) {
 		onclick('.click-instruction',callback);
+		onclick('.plane-pic',callback);
 	},
 	getValues: function () {
 		return {
