@@ -30,7 +30,7 @@ module.exports = function (route, state) {
 		history.back();
 	}
 	
-	onclick('#back', function(){
+	onclick('#back', function(e){
 		console.log('back button');
 		goBack();
 	});

@@ -6,7 +6,7 @@ var page = require('../../templates/index');
 
 
 module.exports = function (route, state) {
-	console.log('LANDING PAGE');
+    console.log('LANDING PAGE');
 
 	if (typeof state.selected_log_format == 'undefined') {
 		state.selected_log_format = 0;
@@ -33,17 +33,23 @@ module.exports = function (route, state) {
         });
 
         $('.content').html(rows);
+
+        onclick('.content',function(e){
+            var target = $(e.target);
+
+            if (!target.hasClass('model-row')) {
+                var target = target.closest('.model-row');
+            }
+
+            if (target.hasClass('model-row')) {
+                var id = target.data('id');
+                console.log('clicked', id);
+                state.selected_model = models.filter(x=>x.rowid==id)[0];
+
+                console.log('leaving state',state);
+
+                state.push({url:'model.html'});
+            }
+        })
     });
-
-    onclick('.content',function(e){
-        var target = $(e.target);
-
-        if (!target.hasClass('model-row')) {
-            var target = target.closest('.model-row');
-        }
-
-        if (target.hasClass('model-row')) {
-            console.log('clicked',target.data('id'));
-        }
-    })
 }

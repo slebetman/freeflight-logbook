@@ -10,20 +10,23 @@ var state = {
 }
 
 var route = {
-	'/add_model': require('./routes/add_model'),
-	'/settings': require('./routes/settings'),
-	'/log_formats': require('./routes/log_formats'),
-	'/setting_selection': require('./routes/setting_selection'),
-	'/index': require('./routes/index')
+	'add_model': require('./routes/add_model'),
+	'settings': require('./routes/settings'),
+	'log_formats': require('./routes/log_formats'),
+	'setting_selection': require('./routes/setting_selection'),
+	'index': require('./routes/index'),
+	'model': require('./routes/model')
 }
 
 function loaded () {
+	console.log('STARTING');
+
 	attachFastClick(document.body);
 	$(window).on('push', function (e) {
 		var pushUrl = url.parse(e.detail.state.url);
 		var path = pushUrl.pathname
 			.replace(/.html$/,'')
-			.replace(/.*\//,'/');
+			.replace(/.*\//,'');
 			
 		if (route[path]) {
 			route[path](pushUrl,state);
@@ -42,7 +45,7 @@ function loaded () {
 		});
 	});
 
-	route['/index']('',state); // Load landing page controller
+	PUSH({url: 'index.html'}) // Load landing page
 }
 
 var app = {
