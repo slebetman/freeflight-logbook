@@ -4,6 +4,12 @@ var alert = require('./lib/alert');
 var page = require('../../templates/settings');
 var onclick = require('./lib/onclick');
 
+var map = {
+	unitLength: '.unit-length',
+	unitWeight: '.unit-weight',
+	unitTorque: '.unit-torque'
+}
+
 module.exports = function (route, state) {
 	console.log('SETTINGS CONTROLLER');
 
@@ -13,17 +19,45 @@ module.exports = function (route, state) {
 
 	state.previousPage = route.pathname;
 	
-	db.settings(settings => {
-		db.getFormatName(settings.defaultFormat, name => {
-			$('.log-format').html(name);
+	(function(){
+		var settingname = state.setting;
+		var settingvalue = state.selected_setting;
+
+		db.settings(settings => {
+			db.getFormatName(settings.defaultFormat, name => {
+				$('.log-format').html(name);
+			});
+
+			if (!settingvalue || settingname !== 'unitLength') {
+				$('.unit-length').html(settings.unitLength);
+			}
+			if (!settingvalue || settingname !== 'unitWeight') {
+				$('.unit-weight').html(settings.unitWeight);
+			}
+			if (!settingvalue || settingname !== 'unitTorque') {
+				$('.unit-torque').html(settings.unitTorque);
+			}
 		});
-		$('.unit-length').html(settings.unitLength);
-		$('.unit-weight').html(settings.unitWeight);
-		$('.unit-torque').html(settings.unitTorque);
-	});
+	})();
+
+	// Save setting if we're returning from setting_selection
+	if (state.selected_setting && state.setting) {
+		(function(){
+			var settingname = state.setting;
+			var settingvalue = state.selected_setting;
+			state.selected_setting = undefined;
+			state.setting = undefined;
+
+			db.setSetting(settingname, settingvalue, function(){
+				$(map[settingname]).html(settingvalue);
+			});
+		})();
+	}
 	
 	onclick('.setting_link', function(e){
-		state.setting = $(e.target).data('settingname');
+		var target = $(e.target);
+		state.setting = target.data('settingname');
+		state.selected_setting = target.find('span.settings-text').text();
 		console.log('setting='+state.setting);
 	});
 	

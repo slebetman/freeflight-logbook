@@ -9,7 +9,11 @@ var onclick = require('./lib/onclick');
 var choices = {
 	unitLength: {
 		title: 'Length Units',
-		list: ['cm', 'in', 'm']
+		list: ['cm', 'in', 'mm']
+	},
+	unitWidth: {
+		title: 'Width Units',
+		list: ['cm', 'in', 'mm']
 	},
 	unitWeight:  {
 		title: 'Weight Units',
@@ -26,24 +30,22 @@ module.exports = function (route, state) {
 	
 	console.log(state);
 	
-	var settingName = state.setting;;
+	var settingName = state.setting;
+	var value = state.selected_setting;
 	
 	page.setTitle(choices[settingName].title);
 	page.drawList(choices[settingName].list);
 	
-	db.getSetting(settingName, value => {
-		checkSelection(value);
-		
-		onclick('#back', function(){
-			console.log('back button');
-			history.back();
-		});
-		
-		onclick('.selection', function(e){
-			var selected = $(e.target).data('setting');
-			db.setSetting(settingName, selected, function(){
-				checkSelection(selected);
-			});
-		});
+	checkSelection(value);
+	
+	onclick('#back', function(){
+		console.log('back button');
+		history.back();
+	});
+	
+	onclick('.selection', function(e){
+		var selected = $(e.target).data('setting');
+		checkSelection(selected);
+		state.selected_setting = selected;
 	});
 }

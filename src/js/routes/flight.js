@@ -4,6 +4,13 @@ var alert = require('./lib/alert');
 var onclick = require('./lib/onclick');
 var page = require('../../templates/flight');
 
+var map = {
+    unitLength: 'span.rubber_length_unit',
+    unitWidth: 'span.rubber_width_unit',
+    unitWeight: 'span.rubber_weight_unit',
+    unitTorque: 'span.torque_unit'
+}
+
 module.exports = function (route, state) {
     console.log('NEW FLIGHT');
 
@@ -12,19 +19,45 @@ module.exports = function (route, state) {
     console.log('model', model);
 
     state.previousPage = route.pathname;
-	
-	db.settings(settings => {
-		$('span.rubber_length_unit').html(settings.unitLength);
-        $('span.rubber_width_unit').html(settings.unitLength);
-		$('span.rubber_weight_unit').html(settings.unitWeight);
-		$('span.torque_unit').html(settings.unitTorque);
-	});
+    
+    (function(){
+		var settingname = state.setting;
+        var settingvalue = state.selected_setting;
+        state.setting = undefined;
+        state.selected_setting = undefined;
+        
+        db.settings(settings => {
+            if (!settingvalue || settingname !== 'unitLength') {
+                $('span.rubber_length_unit').html(settings.unitLength);
+            }
+			if (!settingvalue || settingname !== 'unitWidth') {
+				$('span.rubber_width_unit').html(settings.unitLength);
+            }
+			if (!settingvalue || settingname !== 'unitWeight') {
+				$('span.rubber_weight_unit').html(settings.unitWeight);
+            }
+			if (!settingvalue || settingname !== 'unitTorque') {
+                $('span.torque_unit').html(settings.unitTorque);
+            }
+        });
+
+        if (settingname && settingvalue) {
+            $(map[settingname]).html(settingvalue);
+        }
+    })();
 
     model.meta.fields.forEach(function(f){
         $(`li.table-view-cell.${f}`).css({
             display: 'block'
         })
     });
+
+    onclick('.setting_link', function(e){
+		var target = $(e.target);
+		state.setting = target.data('settingname');
+		state.selected_setting = target.find('span.settings-text').text();
+		console.log('setting='+state.setting);
+	});
 
     onclick('#start-flight',function(){
         var formData = page.getValues();
