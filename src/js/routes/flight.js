@@ -28,21 +28,21 @@ module.exports = function (route, state) {
         
         db.settings(settings => {
             if (!settingvalue || settingname !== 'unitLength') {
-                $('span.rubber_length_unit').html(settings.unitLength);
+                $('span.rubber_length_unit').text(settings.unitLength);
             }
 			if (!settingvalue || settingname !== 'unitWidth') {
-				$('span.rubber_width_unit').html(settings.unitLength);
+				$('span.rubber_width_unit').text(settings.unitLength);
             }
 			if (!settingvalue || settingname !== 'unitWeight') {
-				$('span.rubber_weight_unit').html(settings.unitWeight);
+				$('span.rubber_weight_unit').text(settings.unitWeight);
             }
 			if (!settingvalue || settingname !== 'unitTorque') {
-                $('span.torque_unit').html(settings.unitTorque);
+                $('span.torque_unit').text(settings.unitTorque);
             }
         });
 
         if (settingname && settingvalue) {
-            $(map[settingname]).html(settingvalue);
+            $(map[settingname]).text(settingvalue);
         }
     })();
 

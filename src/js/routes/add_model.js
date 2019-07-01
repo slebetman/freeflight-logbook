@@ -22,7 +22,7 @@ module.exports = function (route, state) {
 		}
 	
 		db.getFormatName(state.selected_log_format, name => {
-			$('.log-format').html(name);
+			$('.log-format').text(name);
 		});
 	});
 
@@ -39,7 +39,7 @@ module.exports = function (route, state) {
 	page.handlePictureUpload(function(){
 		camera.getPicture(function(img){
 			var url = 'data:image/jpeg;base64,' + img;
-			console.log(url);
+			console.log('image size=',url.length);
 			$('.plane-pic').attr('src', url);
 			$('.click-instruction').hide();
 		});

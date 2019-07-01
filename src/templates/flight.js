@@ -26,7 +26,11 @@ module.exports = {
             torque: $('input[name="torque"]').val(),
             rubber_length: $('input[name="rubber_length"]').val(),
             rubber_width: $('input[name="rubber_width"]').val(),
-			notes: $('textarea[name="notes"]').val()
+            notes: $('textarea[name="notes"]').val(),
+            rubber_length_unit: $('span.rubber_length_unit').text(),
+            rubber_width_unit: $('span.rubber_width_unit').text(),
+            rubber_weight_unit: $('span.rubber_weight_unit').text(),
+            torque_unit: $('span.torque_unit').text()
 		}
 	}
 }

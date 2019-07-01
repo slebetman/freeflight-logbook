@@ -25,17 +25,17 @@ module.exports = function (route, state) {
 
 		db.settings(settings => {
 			db.getFormatName(settings.defaultFormat, name => {
-				$('.log-format').html(name);
+				$('.log-format').text(name);
 			});
 
 			if (!settingvalue || settingname !== 'unitLength') {
-				$('.unit-length').html(settings.unitLength);
+				$('.unit-length').text(settings.unitLength);
 			}
 			if (!settingvalue || settingname !== 'unitWeight') {
-				$('.unit-weight').html(settings.unitWeight);
+				$('.unit-weight').text(settings.unitWeight);
 			}
 			if (!settingvalue || settingname !== 'unitTorque') {
-				$('.unit-torque').html(settings.unitTorque);
+				$('.unit-torque').text(settings.unitTorque);
 			}
 		});
 	})();
@@ -49,7 +49,7 @@ module.exports = function (route, state) {
 			state.setting = undefined;
 
 			db.setSetting(settingname, settingvalue, function(){
-				$(map[settingname]).html(settingvalue);
+				$(map[settingname]).text(settingvalue);
 			});
 		})();
 	}

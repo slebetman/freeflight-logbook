@@ -3,7 +3,7 @@ var $ = require('jquery');
 
 module.exports = {
 	setTitle: function (title) {
-		$('.title').html(title);
+		$('.title').text(title);
 	},
 	drawList: function (options) {
 		var list = options.map(opt => {
