@@ -40,9 +40,15 @@ function insert (ctx, callback, query) {
 		query = query.text;
 	}
 	console.log(query);
-	ctx.executeSql(query,params, function (ctx, result) {
-		callback(result.insertId);
-	});
+	ctx.executeSql(query,params,
+		function (ctx, result) {
+			callback(result.insertId);
+		},
+		function(ctx,err){
+			console.error(err.message);
+			alert(err.message);
+		}
+	);
 }
 
 window.DB = null;

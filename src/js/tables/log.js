@@ -20,6 +20,8 @@ module.exports = function (DB,q,i) {
 				rubber_length_unit TEXT,
 				rubber_width DOUBLE,
 				rubber_width_unit TEXT,
+				rubber_weight DOUBLE,
+				rubber_weight_unit TEXT,
 				notes TEXT
 			)`);
 		},
@@ -29,11 +31,8 @@ module.exports = function (DB,q,i) {
 					q(ctx, callback,brick(`
 						SELECT
 							log.rowid,
-							log.*, 
-							location.name as location, 
-							location.id as location_id
-						FORM log
-						JOIN location on location.id = log.location
+							log.*
+						FROM log
 							where log.model = ?
 						`,
 						model_id
@@ -43,7 +42,7 @@ module.exports = function (DB,q,i) {
 			addLog: function (data, callback) {
 				DB.transaction(function(ctx){
 					i(ctx, callback,
-						brick('INSERT INTO log VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+						brick('INSERT INTO log VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
 							data.model,
 							data.timestamp,
 							data.duration,
