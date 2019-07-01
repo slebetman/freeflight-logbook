@@ -3,6 +3,7 @@ var db = require('../db');
 var alert = require('./lib/alert');
 var onclick = require('./lib/onclick');
 var page = require('../../templates/flight');
+var moment = require('moment');
 
 var map = {
     unitLength: 'span.rubber_length_unit',
@@ -80,7 +81,7 @@ module.exports = function (route, state) {
         // data.notes
         
         formData.model = model.rowid;
-        formData.timestamp = Date.now();
+        formData.timestamp = moment.now();
 
         state.selected_model.flight = formData;
 
