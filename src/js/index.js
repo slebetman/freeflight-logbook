@@ -51,19 +51,19 @@ function loaded () {
 }
 
 var app = {
-    initialize: function() {
+	initialize: function() {
 		if (document.URL.match(/^https?:/)) {
 			this.onDeviceReady();
 		}
 		else {
-        	document.addEventListener('deviceready', this.onDeviceReady, false);
+			document.addEventListener('deviceready', this.onDeviceReady, false);
 		}
-    },
-    onDeviceReady: function() {
+	},
+	onDeviceReady: function() {
 		db.init(function(){
 			loaded();
 		});
-    }
+	}
 };
 
 app.initialize();

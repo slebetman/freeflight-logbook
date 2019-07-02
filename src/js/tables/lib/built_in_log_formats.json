@@ -1,38 +1,38 @@
 [
-    {
-        "name": "Simple",
-        "meta": {
-            "fields": [
-                "duration",
-                "location",
-                "windings",
-                "rubber_length",
-                "rubber_width",
-                "notes"
-            ]
-        }
-    },
-    {
-        "name": "Glider",
-        "meta": {
-            "fields": [
-                "duration",
-                "location",
-                "notes"
-            ]
-        }
-    },
-    {
-        "name": "Torque",
-        "meta": {
-            "fields": [
-                "duration",
-                "location",
-                "torque",
-                "rubber_length",
-                "rubber_width",
-                "notes"
-            ]
-        }
-    }
+	{
+		"name": "Simple",
+		"meta": {
+			"fields": [
+				"duration",
+				"location",
+				"windings",
+				"rubber_length",
+				"rubber_width",
+				"notes"
+			]
+		}
+	},
+	{
+		"name": "Glider",
+		"meta": {
+			"fields": [
+				"duration",
+				"location",
+				"notes"
+			]
+		}
+	},
+	{
+		"name": "Torque",
+		"meta": {
+			"fields": [
+				"duration",
+				"location",
+				"torque",
+				"rubber_length",
+				"rubber_width",
+				"notes"
+			]
+		}
+	}
 ]
