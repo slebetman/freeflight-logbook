@@ -2,6 +2,7 @@ var $ = require('jquery');
 var db = require('../db');
 var alert = require('./lib/alert');
 var onclick = require('./lib/onclick');
+var parallel = require('./lib/parallel');
 var page = require('../../templates/index');
 
 
@@ -16,16 +17,31 @@ module.exports = function (route, state) {
 	
 	console.log(state);
 	
-	db.models(function(models){
+	parallel([
+		db.models,
+		db.getLogCount
+	], result => {
+		var models = result[0];
+		var logs = result[1];
+
 		console.log('got models', models);
+		console.log('logs',logs);
+		var logCounts = {};
+		logs.forEach(row => {
+			logCounts[row.model] = row.logs;
+		});
+
 		var rows = [];
 
 		models.forEach(model => {
+			var logCount = logCounts[model.rowid] || 0;
+
 			rows.push(`
 				<div class="model-row" data-id="${model.rowid}">
 					<img src="${model.picture}" class="model-thumbnail">
 					<div class="model-info">
 						<div class="model-name">${model.name}</div>
+						<div class="model-notes">Flights: ${logCount}</div>
 						<div class="model-notes">${model.notes}</div>
 					</div>
 				</div>

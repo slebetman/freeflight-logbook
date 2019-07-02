@@ -41,10 +41,25 @@ module.exports = function (DB,q,i) {
 			},
 			getLocations: function(callback) {
 				DB.transaction(function(ctx){
-					q(ctx, callback,brick(`
+					q(ctx, function(r){
+						callback(r.map(function(x){return x.location}));
+					}, brick(`
 						SELECT DISTINCT 
 							location
 						FROM log
+						`
+					));
+				});
+			},
+			getLogCount: function (callback) {
+				DB.transaction(function(ctx){
+					q(ctx, callback, brick(`
+						SELECT
+							model, 
+							count(rowid) as logs
+						FROM log
+						GROUP BY
+							model
 						`
 					));
 				});

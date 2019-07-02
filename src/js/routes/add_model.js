@@ -26,17 +26,20 @@ module.exports = function (route, state) {
 		});
 	});
 
-	function goBack () {
+	function goBack (transition) {
 		state.selected_log_format = undefined;
-		state.push({
-			url:'index.html',
-			transition:'slide-out'
-		});
+		var target = {
+			url:'index.html'
+		};
+		if (transition) {
+			target.transition = 'slide-out';
+		}
+		state.push(target);
 	}
 	
 	onclick('#back', function(e){
 		console.log('back button');
-		goBack();
+		goBack(true);
 	});
 	
 	page.handlePictureUpload(function(){

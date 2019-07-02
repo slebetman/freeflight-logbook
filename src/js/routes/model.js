@@ -23,7 +23,7 @@ module.exports = function (route, state) {
 			var logTable = $('<table/>');
 			var logHeaders = $('<tr class="header"/>');
 			logHeaders.append(fields.map(function(f){
-				f = f.replace(/_/g,' ')
+				f = f.replace(/_/g,'-')
 					.replace('windings', 'winds')
 					.replace('length', 'len')
 					.replace('weight', 'wt')

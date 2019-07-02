@@ -11,6 +11,21 @@ var map = {
 	unitTorque: 'span.torque_unit'
 }
 
+var unitMap = {
+	rubber_length_unit: 'unitLength',
+	rubber_width_unit: 'unitWidth',
+	rubber_weight_unit: 'unitWeight',
+	torque_unit: 'unitTorque'
+}
+
+function mapUnits (data) {
+	var ret = {};
+	for (var k in unitMap) {
+		ret[unitMap[k]] = data[k];
+	}
+	return ret;
+}
+
 function updateValues (data) {
 	[
 		'location',
@@ -24,6 +39,8 @@ function updateValues (data) {
 }
 
 function updateUnits (data, settingname, settingvalue) {
+	console.log('updateUnits',data, settingname, settingvalue);
+
 	[
 		'unitLength',
 		'unitWidth',
@@ -51,7 +68,7 @@ module.exports = function (route, state) {
 	state.previousPage = route.pathname;
 	
 	db.getLocations(function(loc){
-		console.log('locations',loc);
+		console.log('locations=',loc);
 	});
 	
 	(function(){
@@ -62,7 +79,7 @@ module.exports = function (route, state) {
 
 		if (model.flight) {
 			updateValues(model.flight);
-			updateUnits(model.flight, settingname, settingvalue);
+			updateUnits(mapUnits(model.flight), settingname, settingvalue);
 		}
 		else {
 			db.settings(settings => {

@@ -23,6 +23,8 @@ var route = {
 function loaded () {
 	console.log('STARTING');
 
+	screen.orientation.lock('portrait');
+
 	attachFastClick(document.body);
 	$(window).on('push', function (e) {
 		var pushUrl = url.parse(e.detail.state.url);

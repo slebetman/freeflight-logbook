@@ -69,7 +69,6 @@ tables.init = function (callback) {
 			require('./tables/model')(DB,query,insert),
 			require('./tables/log_format')(DB,query,insert),
 			require('./tables/settings')(DB,query,insert),
-			require('./tables/location')(DB,query,insert),
 			require('./tables/log')(DB,query,insert)
 		];
 	}
