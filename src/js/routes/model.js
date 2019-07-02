@@ -12,9 +12,10 @@ module.exports = function (route, state) {
 
     var model = state.selected_model;
 
-    function loadLogs () {
+    function loadLogs (callback) {
         db.logs(model.rowid, function(logs){
             var fields = model.meta.fields;
+            logs.reverse();
 
             console.log('logs=',logs);
             console.log('fields=',fields);
@@ -23,9 +24,10 @@ module.exports = function (route, state) {
             var logHeaders = $('<tr class="header" />');
             logHeaders.append(fields.map(function(f){
                 f = f.replace(/_/g,' ')
+                    .replace('windings', 'winds')
                     .replace('length', 'len')
                     .replace('weight', 'wt')
-                    .replace('rubber', 'rub');
+                    .replace('rubber', 'r');
 
                 return $('<td/>').text(f) 
             }));
@@ -36,17 +38,35 @@ module.exports = function (route, state) {
 
                 fields.forEach(function(f){
                     var val = row[f];
-                    if (f === 'duration') {
-                        val = moment.utc(val).format('mm:ss.SSS');
+                    if (val != '') {
+                        switch (f) {
+                            case 'duration':
+                                val = moment.utc(val).format('mm:ss.SSS');
+                                break;
+                            case 'rubber_length':
+                                val += ` <span class="unit">${row.rubber_length_unit}</span>`;
+                                break;
+                            case 'rubber_width':
+                                    val += ` <span class="unit">${row.rubber_width_unit}</span>`;
+                                    break;
+                            case 'rubber_weight':
+                                    val += ` <span class="unit">${row.rubber_weight_unit}</span>`;
+                                    break;
+                            case 'torque':
+                                    val += ` <span class="unit">${row.torque_unit}</span>`;
+                                    break;
+                        }
                     }
 
                     console.log('field ',f,val);
-                    logData.append($('<td/>').text(val));
+                    logData.append($('<td/>').html(val));
                 });
                 logTable.append(logData);
             });
 
             $('.content').html(logTable);
+
+            if (callback) callback(logTable);
         });
     }
 
@@ -68,7 +88,21 @@ module.exports = function (route, state) {
 
         db.addLog(flight, function(){
             console.log('saved log');
-            loadLogs();
+            loadLogs(function(table){
+                var added = $(table.find('tr')[1]);
+
+                var c = 1;
+
+                function fade () {
+                    c += 2;
+                    added.css('background-color',`rgb(255,255,${c})`);
+                    if (c < 255) {
+                        setTimeout(fade,10);
+                    }
+                }
+
+                fade();
+            });
         });
     }
     else {

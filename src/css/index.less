@@ -106,15 +106,22 @@ div.content div.buttons {
 		overflow-x: scroll;
 
 		table {
+			td {
+				padding: 2px 5px 0px 5px;
+				white-space: nowrap;
+			}
 			tr.header {
 				font-weight: bold;
 				background: #ccc;
 				text-transform: capitalize;
+				
+				td {
+					padding-bottom: 2px;		
+				}
 			}
-			td {
-				padding: 2px;
-				padding-right: 8px;
-				white-space: nowrap;
+
+			span.unit {
+				color: #999;
 			}
 		}
 	}
