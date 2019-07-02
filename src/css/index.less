@@ -101,28 +101,28 @@ div.content div.buttons {
 	width: 100%;
 }
 
-.flight-log {
-	.content {
-		overflow-x: scroll;
+.flight-log table {
+	min-width: 100%;
 
-		table {
-			td {
-				padding: 2px 5px 0px 5px;
-				white-space: nowrap;
-			}
-			tr.header {
-				font-weight: bold;
-				background: #ccc;
-				text-transform: capitalize;
-				
-				td {
-					padding-bottom: 2px;		
-				}
-			}
+	td, th {
+		white-space: nowrap;
+	}
 
-			span.unit {
-				color: #999;
-			}
-		}
+	td {
+		padding: 2px 5px 0px 5px;
+	}
+
+	th {
+		font-weight: bold;
+		text-transform: capitalize;
+		padding: 2px 5px 2px 5px;
+	}
+
+	tr.header {
+		background: #ccc;
+	}
+
+	span.unit {
+		color: #999;
 	}
 }

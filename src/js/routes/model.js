@@ -21,7 +21,7 @@ module.exports = function (route, state) {
 			console.log('fields=',fields);
 
 			var logTable = $('<table/>');
-			var logHeaders = $('<tr class="header" />');
+			var logHeaders = $('<tr class="header"/>');
 			logHeaders.append(fields.map(function(f){
 				f = f.replace(/_/g,' ')
 					.replace('windings', 'winds')
@@ -29,7 +29,7 @@ module.exports = function (route, state) {
 					.replace('weight', 'wt')
 					.replace('rubber', 'r');
 
-				return $('<td/>').text(f) 
+				return $('<th/>').text(f) 
 			}));
 
 			logTable.append(logHeaders);
@@ -64,7 +64,7 @@ module.exports = function (route, state) {
 				logTable.append(logData);
 			});
 
-			$('.content').html(logTable);
+			$('.flight-log').html(logTable);
 
 			if (callback) callback(logTable);
 		});

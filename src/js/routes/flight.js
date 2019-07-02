@@ -11,6 +11,36 @@ var map = {
 	unitTorque: 'span.torque_unit'
 }
 
+function updateValues (data) {
+    [
+        'location',
+        'rubber_length',
+        'rubber_width',
+        'rubber_weight'
+
+    ].forEach(function(key){
+        $(`input[name="${key}"]`).val(data[key]);
+    });
+}
+
+function updateUnits (data, settingname, settingvalue) {
+    [
+        'unitLength',
+        'unitWidth',
+        'unitWeight',
+        'unitTorque'
+
+    ].forEach(function(key){
+        var datakey = key;
+        if (key == 'unitWidth') {
+            datakey = 'unitLength';
+        }
+        if (!settingvalue || settingname !== key) {
+            $(map[key]).text(data[datakey]);
+        }
+    })
+}
+
 module.exports = function (route, state) {
 	console.log('NEW FLIGHT');
 
@@ -19,37 +49,30 @@ module.exports = function (route, state) {
 	console.log('model', model);
 
 	state.previousPage = route.pathname;
-	
-	(function(){
-		var settingname = state.setting;
-		var settingvalue = state.selected_setting;
-		state.setting = undefined;
-		state.selected_setting = undefined;
-		
-		db.settings(settings => {
-			if (!settingvalue || settingname !== 'unitLength') {
-				$('span.rubber_length_unit').text(settings.unitLength);
-			}
-			if (!settingvalue || settingname !== 'unitWidth') {
-				$('span.rubber_width_unit').text(settings.unitLength);
-			}
-			if (!settingvalue || settingname !== 'unitWeight') {
-				$('span.rubber_weight_unit').text(settings.unitWeight);
-			}
-			if (!settingvalue || settingname !== 'unitTorque') {
-				$('span.torque_unit').text(settings.unitTorque);
-			}
-		});
+    
+    (function(){
+        var settingname = state.setting;
+        var settingvalue = state.selected_setting;
+        state.setting = undefined;
+        state.selected_setting = undefined;
 
-		if (settingname && settingvalue) {
-			$(map[settingname]).text(settingvalue);
-		}
-	})();
+        if (model.flight) {
+            updateValues(model.flight);
+            updateUnits(model.flight, settingname, settingvalue);
+        }
+        else {
+            db.settings(settings => {
+                updateUnits(settings, settingname, settingvalue);
+            });
+        }
+
+        if (settingname && settingvalue) {
+            $(map[settingname]).text(settingvalue);
+        }
+    })();
 
 	model.meta.fields.forEach(function(f){
-		$(`li.table-view-cell.${f}`).css({
-			display: 'block'
-		})
+		$(`li.table-view-cell.${f}`).show();
 	});
 
 	onclick('.setting_link', function(e){
