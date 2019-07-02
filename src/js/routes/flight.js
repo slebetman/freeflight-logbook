@@ -69,6 +69,48 @@ module.exports = function (route, state) {
 	
 	db.getLocations(function(loc){
 		console.log('locations=',loc);
+		var locationInput = $('input[name="location"]');
+		var locationAutosuggest = $('#location-autosuggest');
+	
+		locationInput.on('input',e => {
+			var input = locationInput.val();
+			var matches = loc.filter(l => l.match(new RegExp(input,'i')));
+
+			console.log(input, matches);
+
+			if (matches.length > 0 && input != '') {
+				console.log('show');
+				var bbox = locationInput[0].getBoundingClientRect();
+
+				console.log('bbox',bbox.bottom);
+
+				$('.autosuggest')
+					.html(matches.map(x => `<div class="autosuggest-value" data-value="${x}">${x}</div>`));
+
+				locationAutosuggest
+					.css('top',bbox.bottom)
+					.show();
+			}
+			else {
+				locationAutosuggest.hide();
+			}
+		});
+
+		onclick('.autosuggest', e => {
+			console.log('autosuggest clicked');
+
+			var target = $(e.target);
+			var val = target.data('value');
+
+			if (val) {
+				locationInput.val(val);
+			}
+		});
+
+		locationInput.on('blur', e => {
+			console.log('blur');
+			locationAutosuggest.hide();
+		})
 	});
 	
 	(function(){
