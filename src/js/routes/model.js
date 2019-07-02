@@ -81,29 +81,29 @@ module.exports = function (route, state) {
 			if (flight[k] === undefined) {
 				flight[k] = '';
 			}
-        }
-        
-        if (flight.rubber_width_unit === 'in') {
-            var w = flight.rubber_width;
-            w = w.trim();
-            if (w.match(/^\d\d+$/)) {
-                w = '0.' + w;
-            }
-            if (w.match(/^\.\d+$/)) {
-                w = '0' + w;
-            }
-            w.replace(/ /g,'');
-            // Replace common fractions:
-            switch (w) {
-                case '0.5': w = '1/2'; break;
-                case '0.25': w = '1/4'; break;
-                case '0.125': w = '1/8'; break;
-                case '0.0625': w = '1/16'; break;
-                case '0.03125': w = '1/32'; break;
-                case '0.015625': w = '1/64'; break;
-            }
-            flight.rubber_width = w;
-        }
+		}
+		
+		if (flight.rubber_width_unit === 'in') {
+			var w = flight.rubber_width;
+			w = w.trim();
+			if (w.match(/^\d\d+$/)) {
+				w = '0.' + w;
+			}
+			if (w.match(/^\.\d+$/)) {
+				w = '0' + w;
+			}
+			w.replace(/ /g,'');
+			// Replace common fractions:
+			switch (w) {
+				case '0.5': w = '1/2'; break;
+				case '0.25': w = '1/4'; break;
+				case '0.125': w = '1/8'; break;
+				case '0.0625': w = '1/16'; break;
+				case '0.03125': w = '1/32'; break;
+				case '0.015625': w = '1/64'; break;
+			}
+			flight.rubber_width = w;
+		}
 
 		console.log('logged time=',moment.utc(flight.duration).format('mm:ss.SSS'));
 		console.log(JSON.stringify(flight,null,2));
@@ -135,6 +135,9 @@ module.exports = function (route, state) {
 
 	onclick('#back',function(){
 		console.log('back');
-		state.push({url: 'index.html'});
+		state.push({
+			url: 'index.html',
+			transition:'slide-out'
+		});
 	})
 }

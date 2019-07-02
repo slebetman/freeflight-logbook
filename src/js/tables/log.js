@@ -39,6 +39,16 @@ module.exports = function (DB,q,i) {
 					));
 				});
 			},
+			getLocations: function(callback) {
+				DB.transaction(function(ctx){
+					q(ctx, callback,brick(`
+						SELECT DISTINCT 
+							location
+						FROM log
+						`
+					));
+				});
+			},
 			addLog: function (data, callback) {
 				DB.transaction(function(ctx){
 					i(ctx, callback,

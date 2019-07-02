@@ -28,7 +28,10 @@ module.exports = function (route, state) {
 
 	function goBack () {
 		state.selected_log_format = undefined;
-		state.push({url:'index.html'});
+		state.push({
+			url:'index.html',
+			transition:'slide-out'
+		});
 	}
 	
 	onclick('#back', function(e){

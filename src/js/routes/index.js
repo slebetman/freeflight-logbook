@@ -48,7 +48,10 @@ module.exports = function (route, state) {
 
 				console.log('leaving state',state);
 
-				state.push({url:'model.html'});
+				state.push({
+					url:'model.html',
+					transition:'slide-in'
+				});
 			}
 		})
 	});

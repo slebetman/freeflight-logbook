@@ -12,33 +12,33 @@ var map = {
 }
 
 function updateValues (data) {
-    [
-        'location',
-        'rubber_length',
-        'rubber_width',
-        'rubber_weight'
+	[
+		'location',
+		'rubber_length',
+		'rubber_width',
+		'rubber_weight'
 
-    ].forEach(function(key){
-        $(`input[name="${key}"]`).val(data[key]);
-    });
+	].forEach(function(key){
+		$(`input[name="${key}"]`).val(data[key]);
+	});
 }
 
 function updateUnits (data, settingname, settingvalue) {
-    [
-        'unitLength',
-        'unitWidth',
-        'unitWeight',
-        'unitTorque'
+	[
+		'unitLength',
+		'unitWidth',
+		'unitWeight',
+		'unitTorque'
 
-    ].forEach(function(key){
-        var datakey = key;
-        if (key == 'unitWidth') {
-            datakey = 'unitLength';
-        }
-        if (!settingvalue || settingname !== key) {
-            $(map[key]).text(data[datakey]);
-        }
-    })
+	].forEach(function(key){
+		var datakey = key;
+		if (key == 'unitWidth') {
+			datakey = 'unitLength';
+		}
+		if (!settingvalue || settingname !== key) {
+			$(map[key]).text(data[datakey]);
+		}
+	})
 }
 
 module.exports = function (route, state) {
@@ -49,27 +49,31 @@ module.exports = function (route, state) {
 	console.log('model', model);
 
 	state.previousPage = route.pathname;
-    
-    (function(){
-        var settingname = state.setting;
-        var settingvalue = state.selected_setting;
-        state.setting = undefined;
-        state.selected_setting = undefined;
+	
+	db.getLocations(function(loc){
+		console.log('locations',loc);
+	});
+	
+	(function(){
+		var settingname = state.setting;
+		var settingvalue = state.selected_setting;
+		state.setting = undefined;
+		state.selected_setting = undefined;
 
-        if (model.flight) {
-            updateValues(model.flight);
-            updateUnits(model.flight, settingname, settingvalue);
-        }
-        else {
-            db.settings(settings => {
-                updateUnits(settings, settingname, settingvalue);
-            });
-        }
+		if (model.flight) {
+			updateValues(model.flight);
+			updateUnits(model.flight, settingname, settingvalue);
+		}
+		else {
+			db.settings(settings => {
+				updateUnits(settings, settingname, settingvalue);
+			});
+		}
 
-        if (settingname && settingvalue) {
-            $(map[settingname]).text(settingvalue);
-        }
-    })();
+		if (settingname && settingvalue) {
+			$(map[settingname]).text(settingvalue);
+		}
+	})();
 
 	model.meta.fields.forEach(function(f){
 		$(`li.table-view-cell.${f}`).show();
