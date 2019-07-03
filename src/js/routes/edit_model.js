@@ -22,10 +22,10 @@ module.exports = function (route, state) {
 	$('.log-format').text(state.selected_log_format_name || model.meta.format);
 	page.setValues(model);
 
-	function goBack (transition) {
+	function goBack (transition, url) {
 		state.selected_log_format = undefined;
 		var target = {
-			url:'model.html'
+			url: url || 'model.html'
 		};
 		if (transition) {
 			target.transition = 'slide-out';
@@ -45,6 +45,24 @@ module.exports = function (route, state) {
 			$('.plane-pic').attr('src', url);
 			$('.click-instruction').hide();
 		});
+	});
+
+	onclick('#delete-model',function(){
+		navigator.notification.confirm(
+			'Are you sure you want to delete all this model? ' +
+			'This action cannot be undone!',
+			function(choice) {
+				console.log('choice', choice);
+				if (choice == 1) {
+					db.deleteLogByModel(model.rowid, function(){
+						db.deleteModelById(model.rowid, function(){
+							goBack(false, 'index.html');
+						});
+					});
+				}
+			},
+			'WARNING!'
+		);
 	});
 	
 	page.handleSaveButton(function(){

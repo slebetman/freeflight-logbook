@@ -64,6 +64,17 @@ module.exports = function (DB,q,i) {
 					));
 				});
 			},
+			deleteLogByModel: function(model_id, callback) {
+				DB.transaction(function(ctx){
+					q(ctx, callback, brick(`
+						DELETE FROM log
+						WHERE
+							model = ?
+						`,
+						model_id
+					));
+				});
+			},
 			addLog: function (data, callback) {
 				DB.transaction(function(ctx){
 					i(ctx, callback,
