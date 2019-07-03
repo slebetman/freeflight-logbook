@@ -1,5 +1,4 @@
 var ratchet = require('ratchet-npm/dist/js/ratchet');
-var attachFastClick = require('fastclick');
 var url = require('url');
 var db = require('./db');
 var $ = require('jquery');
@@ -18,6 +17,7 @@ var route = {
 	'index': require('./routes/index'),
 	'model': require('./routes/model'),
 	'flight': require('./routes/flight'),
+	'edit_flight': require('./routes/edit_flight'),
 	'timer': require('./routes/timer')
 }
 
@@ -26,7 +26,6 @@ function loaded () {
 
 	screen.orientation.lock('portrait');
 
-	attachFastClick(document.body);
 	$(window).on('push', function (e) {
 		var pushUrl = url.parse(e.detail.state.url);
 		var path = pushUrl.pathname

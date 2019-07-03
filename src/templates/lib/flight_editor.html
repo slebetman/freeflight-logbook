@@ -1,0 +1,101 @@
+<div class="card">
+	<form id="new-flight">
+		<ul class="table-view">
+			<!--
+			<li class="table-view-cell media location">
+				<a class="navigate-right" href="./location.html" data-transition="slide-in">
+					Location
+					<span class="location pull-right settings-text"></span>
+				</a>
+			</li>
+			-->
+			<li class="table-view-cell media input info" id="flight-info">
+				<table>
+					<tr>
+						<td><span class="flight-duration">Duration:</span></td>
+						<td><span id="duration" class="flight-duration"></span></td>
+					</tr>
+					<tr>
+						<td>Date:</td>
+						<td><span id="timestamp"></span></td>
+					</tr>
+				</table>
+			</li>
+			<li class="table-view-cell media input location">
+				<label for="location">Location</label>
+				<input name="location" type="text">
+			</li>
+			<li class="table-view-cell media input windings">
+				<label for="windings">Windings</label>
+				<input name="windings" type="number">
+			</li>
+			<li class="table-view-cell media input backoff">
+				<label for="backoff">Backoff</label>
+				<input name="backoff" type="text">
+			</li>
+			<li class="table-view-cell media input torque">
+				<label for="torque">Torque</label>
+				<input name="torque" type="text">
+			</li>
+			<li class="table-view-cell media torque">
+				<a class="navigate-right setting_link" 
+					href="./setting_selection.html" 
+					data-transition="slide-in"
+					data-settingname="unitTorque"
+				>
+					Torque Unit
+					<span class="torque_unit pull-right settings-text"></span>
+				</a>
+			</li>
+			<li class="table-view-cell media input rubber_length">
+				<label for="rubber_length">Rubber Length</label>
+				<input name="rubber_length" type="text">
+			</li>
+			<li class="table-view-cell media rubber_length">
+				<a class="navigate-right setting_link" 
+					href="./setting_selection.html" 
+					data-transition="slide-in"
+					data-settingname="unitLength"
+				>
+					Rubber Length Unit
+					<span class="rubber_length_unit pull-right settings-text"></span>
+				</a>
+			</li>
+			<li class="table-view-cell media input rubber_width">
+				<label for="rubber_width">Rubber Width</label>
+				<input name="rubber_width" type="text">
+			</li>
+			<li class="table-view-cell media rubber_width">
+				<a class="navigate-right setting_link" 
+					href="./setting_selection.html" 
+					data-transition="slide-in"
+					data-settingname="unitWidth"
+				>
+					Rubber Width Unit
+					<span class="rubber_width_unit pull-right settings-text"></span>
+				</a>
+			</li>
+			<li class="table-view-cell media input rubber_weight">
+					<label for="rubber_weight">Rubber Weight</label>
+					<input name="rubber_weight" type="text">
+				</li>
+				<li class="table-view-cell media rubber_weight">
+					<a class="navigate-right setting_link" 
+						href="./setting_selection.html" 
+						data-transition="slide-in"
+						data-settingname="unitWeight"
+					>
+						Rubber Weight Unit
+						<span class="rubber_weight_unit pull-right settings-text"></span>
+					</a>
+				</li>
+			<li class="table-view-cell media input notes">
+				<label for="notes">Notes</label>
+				<textarea name="notes" rows="5"></textarea>
+			</li>
+		</ul>
+	</form>
+</div>
+<div id="location-autosuggest">
+	<div class="autosuggest"></div>
+</div>

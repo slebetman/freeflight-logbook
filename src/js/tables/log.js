@@ -30,12 +30,25 @@ module.exports = function (DB,q,i) {
 				DB.transaction(function(ctx){
 					q(ctx, callback,brick(`
 						SELECT
-							log.rowid,
-							log.*
+							rowid,
+							*
 						FROM log
-							where log.model = ?
+							where model = ?
 						`,
 						model_id
+					));
+				});
+			},
+			getLogById: function (rowid, callback) {
+				DB.transaction(function(ctx){
+					q(ctx, row => callback(row[0]),brick(`
+						SELECT
+							rowid,
+							*
+						FROM log
+							where rowid = ?
+						`,
+						rowid
 					));
 				});
 			},
@@ -96,6 +109,43 @@ module.exports = function (DB,q,i) {
 							data.rubber_weight,
 							data.rubber_weight_unit,
 							data.notes
+						)
+					);
+				});
+			},
+			saveLog: function (rowid, data, callback) {
+				DB.transaction(function(ctx){
+					q(ctx, callback,
+						brick(`
+							UPDATE log
+							SET
+								location = ?,
+								windings = ?,
+								backoff = ?,
+								torque = ?,
+								torque_unit = ?,
+								rubber_length = ?,
+								rubber_length_unit = ?,
+								rubber_width = ?,
+								rubber_width_unit = ?,
+								rubber_weight = ?,
+								rubber_weight_unit = ?,
+								notes = ?
+							WHERE rowid = ?
+						`,
+							data.location,
+							data.windings,
+							data.backoff,
+							data.torque,
+							data.torque_unit,
+							data.rubber_length,
+							data.rubber_length_unit,
+							data.rubber_width,
+							data.rubber_width_unit,
+							data.rubber_weight,
+							data.rubber_weight_unit,
+							data.notes,
+							rowid
 						)
 					);
 				});

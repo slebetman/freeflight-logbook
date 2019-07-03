@@ -3,6 +3,7 @@ var db = require('../db');
 var alert = require('./lib/alert');
 var onclick = require('./lib/onclick');
 var moment = require('moment');
+var format = require('./lib/format');
 var page = require('../../templates/model');
 
 module.exports = function (route, state) {
@@ -34,14 +35,14 @@ module.exports = function (route, state) {
 
 			logTable.append(logHeaders);
 			logs.forEach(function(row){
-				var logData = $('<tr/>');
+				var logData = $(`<tr  class="log-row" data-flight="${row.rowid}" />`);
 
 				fields.forEach(function(f){
 					var val = row[f];
 					if (val != '') {
 						switch (f) {
 							case 'duration':
-								val = moment.utc(val).format('mm:ss.SSS');
+								val = format.duration(val);
 								break;
 							case 'rubber_length':
 								val += ` <span class="unit">${row.rubber_length_unit}</span>`;
@@ -59,8 +60,17 @@ module.exports = function (route, state) {
 					}
 
 					console.log('field ',f,val);
-					logData.append($('<td/>').html(val));
+					var logRow = $('<td/>').html(val);
+					logData.append(logRow);
 				});
+
+				onclick(logData,function(){
+					$('.log-row').css('background-color','');
+					logData.css('background-color', '#ccf');
+					state.selected_flight = logData.data('flight');
+					$('#edit-log').show();
+				});
+
 				logTable.append(logData);
 			});
 
@@ -105,7 +115,7 @@ module.exports = function (route, state) {
 			flight.rubber_width = w;
 		}
 
-		console.log('logged time=',moment.utc(flight.duration).format('mm:ss.SSS'));
+		console.log('logged time=',format.duration(flight.duration));
 		console.log(JSON.stringify(flight,null,2));
 
 		db.addLog(flight, function(){

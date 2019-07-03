@@ -3,6 +3,7 @@ var db = require('../db');
 var alert = require('./lib/alert');
 var onclick = require('./lib/onclick');
 var page = require('../../templates/index');
+var format = require('./lib/format');
 var moment = require('moment');
 
 module.exports = function (route, state) {
@@ -26,7 +27,7 @@ module.exports = function (route, state) {
 
 			running = setInterval(function(){
 				var elapsed = moment().diff(start);
-				$('#timer').text(moment.utc(elapsed).format('mm:ss.SS'));
+				$('#timer').text(format.duration(elapsed));
 			},10);
 		}
 		else {
