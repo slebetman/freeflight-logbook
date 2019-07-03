@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<meta name="format-detection" content="telephone=no" />
+	<meta name="msapplication-tap-highlight" content="no" />
+	<meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
+	<!-- This is a wide open CSP declaration. To lock this down for production, see below. -->
+	<meta http-equiv="Content-Security-Policy" content="default-src * gap: file: 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src * blob:" />
+	<!-- Good default declaration:
+	* gap: is required only on iOS (when using UIWebView) and is needed for JS->native communication
+	* https://ssl.gstatic.com is required only on Android and is needed for TalkBack to function properly
+	* Disables use of eval() and inline scripts in order to mitigate risk of XSS vulnerabilities. To change this:
+		* Enable inline JS: add 'unsafe-inline' to default-src
+		* Enable eval(): add 'unsafe-eval' to default-src
+	* Create your own at http://cspisawesome.com
+	-->
+
+	<link rel="stylesheet" type="text/css" href="css/index.css" />
+	<title>Free-flight Logbook</title>
+</head>
+<body>
+	<header class="bar bar-nav">
+		<a id="back" class="icon icon-left-nav pull-left" data-transition="slide-out"></a>
+		<h1 class="title">Locations</h1>
+	</header>
+	
+	<div class="content">
+		<ul class="table-view" id="location-list">
+		</ul>
+	</div>
+	
+	<div class="bar bar-standard bar-footer">
+		<a class="btn btn-primary pull-left" data-transition="slide-in">
+			<span class="icon icon-plus"></span>
+			Add Location
+		</a>
+		<a class="btn btn-primary pull-right" data-transition="slide-in">
+			<span class="icon icon-info"></span>
+			Location Info
+		</a>
+	</div>
+	
+	<script type="text/javascript" src="cordova.js"></script>
+	<script type="text/javascript" src="js/index.js"></script></body>
+</html>
