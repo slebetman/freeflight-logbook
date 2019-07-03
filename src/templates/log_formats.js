@@ -6,7 +6,7 @@ module.exports = {
 		var list = formats.map(f => {
 			return `	
 			<li class="table-view-cell media">
-				<a class="selection" data-format="${f.rowid}">
+				<a class="selection" data-format="${f.rowid}" data-name="${f.name}">
 					<span class="media-object icon"></span>
 					${f.name}
 				</a>

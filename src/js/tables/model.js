@@ -43,6 +43,29 @@ module.exports = function (DB,q,i) {
 					);
 				});
 			},
+			saveModel: function (id, data, callback) {
+				DB.transaction(function(ctx){
+					var meta = JSON.stringify(data.meta) || "{}";
+					q(ctx, callback,
+						brick(`
+							UPDATE model
+							SET
+								name = ?,
+								notes = ?,
+								picture = ?,
+								meta = ?
+							WHERE
+								rowid = ?
+						`,
+							data.name,
+							data.notes,
+							data.picture,
+							meta,
+							id
+						)
+					);
+				});
+			},
 			deleteModelById: function (id, callback) {
 				DB.transaction(function(ctx){
 					q(ctx,callback,

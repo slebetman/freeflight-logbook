@@ -11,6 +11,7 @@ var state = {
 
 var route = {
 	'add_model': require('./routes/add_model'),
+	'edit_model': require('./routes/edit_model'),
 	'settings': require('./routes/settings'),
 	'log_formats': require('./routes/log_formats'),
 	'setting_selection': require('./routes/setting_selection'),

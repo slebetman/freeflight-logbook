@@ -10,6 +10,7 @@ function loadSelectedFormat (from, state, callback) {
 			case '/settings':
 				callback(defaultFormat);
 				break;
+			case '/edit_model':
 			case '/add_model':
 				if (typeof state.selected_log_format == 'undefined') {
 					state.selected_log_format = defaultFormat;
@@ -28,15 +29,17 @@ function loadSelectedFormat (from, state, callback) {
 	});
 }
 
-function saveSelectedFormat (selected, from, state, callback) {	
+function saveSelectedFormat (selected, name, from, state, callback) {	
 	console.log(selected);
 	
 	switch (from) {
 		case '/settings':
 			db.setSetting('defaultFormat',selected.toString(),callback);
 			break;
+		case '/edit_model':
 		case '/add_model':
 			state.selected_log_format = selected;
+			state.selected_log_format_name = name;
 			callback();
 			break;
 		default:
@@ -68,7 +71,8 @@ module.exports = function (route, state) {
 			
 			onclick('.selection', function(e){
 				var selected = $(e.target).data('format');
-				saveSelectedFormat(selected, from, state, function(){
+				var name = $(e.target).data('name');
+				saveSelectedFormat(selected, name, from, state, function(){
 					checkSelection(selected);
 				});
 			});
