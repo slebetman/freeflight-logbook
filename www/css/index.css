@@ -1314,8 +1314,14 @@ textarea {
   top: 0;
   margin-right: 5px;
 }
+div.content {
+  margin-bottom: 44px;
+}
 div.content .icon {
   font-size: inherit !important;
+}
+div.content div.buttons {
+  margin: 10px;
 }
 form .input {
   padding: 11px 15px 11px 15px;
@@ -1336,6 +1342,9 @@ a.selection span.icon {
   display: inline-block;
   text-align: center;
   padding: 20px;
+  color: white;
+  text-shadow: black 0px 1px 4px;
+  font-weight: bold;
 }
 .model-row {
   margin-top: 5px;
@@ -1359,15 +1368,12 @@ a.selection span.icon {
 }
 #timer {
   text-align: center;
-  font-size: 6em;
+  font-size: 5.5em;
   margin-top: 50%;
   width: 100%;
 }
 form#new-flight li.table-view-cell {
   display: none;
-}
-div.content div.buttons {
-  margin: 10px;
 }
 #timer-instruction {
   text-align: center;

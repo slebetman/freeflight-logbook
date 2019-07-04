@@ -18769,8 +18769,12 @@ module.exports = {
 },{"../../db":12,"./onclick":24,"jquery":2}],23:[function(require,module,exports){
 const moment = require('moment');
 
-function duration (t) {
-	return moment.utc(t).format('mm:ss.SSS');
+function duration (t,msDigits) {
+	var ms = 'SSS'
+	if (msDigits !== undefined) {
+		ms = 'S'.repeat(msDigits);
+	}
+	return moment.utc(t).format('mm:ss.' + ms);
 }
 
 function timestamp (t) {
@@ -18788,16 +18792,19 @@ var $ = require('jquery');
 // So we listen to both click and touchstart.
 
 module.exports = function (selector, callback) {
-	var prevScroll = 0;
+	var clicking = false;
 	
 	$(selector).on('touchstart', function(e){
-		prevScroll = $(e.target).offset().top;
+		clicking = true;
+	});
+
+	$(selector).on('touchmove', function(e){
+		clicking = false;
 	});
 	
 	$(selector).on('touchend', function(e){
-		var scroll = $(e.target).offset().top;
-	
-		if (Math.abs(scroll - prevScroll) < 5) {
+		if (clicking) {
+			clicking = false;
 			callback(e);
 		}
 	});
@@ -19230,7 +19237,7 @@ module.exports = function (route, state) {
 
 			running = setInterval(function(){
 				var elapsed = moment().diff(start);
-				$('#timer').text(format.duration(elapsed));
+				$('#timer').text(format.duration(elapsed, 2));
 			},10);
 		}
 		else {
