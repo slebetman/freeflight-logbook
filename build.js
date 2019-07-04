@@ -23,7 +23,8 @@ browserify([
 ])
 .bundle().pipe(fs.createWriteStream(
 	'./www/js/index.js'
-));
+))
+.on('finish', ()=>console.log('done compiling js'));
 
 var css =
 	fs.readFileSync('./node_modules/ratchet-npm/dist/css/ratchet.min.css','utf8') +
@@ -35,11 +36,14 @@ less.render(css.toString('utf8'),{}, function(err, output) {
 	}
 	else {
 		fs.writeFileSync('./www/css/index.css',output.css);
+		console.log('done compiling css');
 	}
 });
 
 HBS.generateSite('src/templates','www').then(
-function(){},
+function(){
+	console.log('done compiling html');
+},
 function(err){
 	console.error(err);
 });
@@ -105,22 +109,22 @@ function generateIcons () {
 	return Promise.all(promises).then(() => 'done generating icons');
 }
 
+Promise.all([
 copy('**','./www/img',{
 	cwd: './src/img',
 	verbose: false
-})
-.then(()=>{}).catch(log);
+	}),
 
 copy('**','./www/res',{
 	cwd: './src/res',
 	verbose: false
-})
-.then(()=>{}).catch(log);
+	}),
 
 copy('**','./www/fonts',{
 	cwd: './node_modules/ratchet-npm/dist/fonts',
 	verbose: false
 })
-.then(()=>{}).catch(log);
+])
+.then(()=>console.log('done copying res')).catch(log);
 
 generateIcons().then(log).catch(log);

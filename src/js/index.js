@@ -26,6 +26,15 @@ function loaded () {
 
 	screen.orientation.lock('portrait');
 
+	window.onerror = function (err) {
+		console.log('ERROR:', err, err.message);
+		$('.content').html(`
+			<div>
+				<h1>ERROR</h1>
+				${err.message}
+			</div>
+		`);
+	}
 	$(window).on('push', function (e) {
 		var pushUrl = url.parse(e.detail.state.url);
 		var path = pushUrl.pathname
@@ -33,20 +42,32 @@ function loaded () {
 			.replace(/.*\//,'');
 			
 		if (route[path]) {
+			try {
 			route[path](pushUrl,state);
+		}
+			catch(err) {
+				console.log('ERROR:', err, err.message);
+				$('.content').html(`
+					<div>
+						<h1>ERROR</h1>
+						${err.message}
+					</div>
+				`);
+			}
 		}
 		
 		console.log('PATH:' + path);
 		
 		// Fix non-responsive input on mobile:
-		$('input[type="text"]').on('touchstart',function(e){
-			$(e.target).focus();
-		});
-		
-		// Fix non-responsive textarea on mobile: 
-		$('textarea').on('touchstart',function(e){
-			$(e.target).focus();
-		});
+		[
+			'input[type="text"]',
+			'input[type="number"]',
+			'textarea',
+		].forEach(
+			x => $(x).on('touchstart',
+				e => $(e.target).focus()
+			)
+		);
 	});
 
 	PUSH({url: 'index.html'}) // Load landing page
