@@ -110,18 +110,20 @@ function generateIcons () {
 }
 
 Promise.all([
-	copy('**','./www/img',{
-		cwd: './src/img',
-		verbose: false
+copy('**','./www/img',{
+	cwd: './src/img',
+	verbose: false
 	}),
-	copy('**','./www/res',{
-		cwd: './src/res',
-		verbose: false
+
+copy('**','./www/res',{
+	cwd: './src/res',
+	verbose: false
 	}),
-	copy('**','./www/fonts',{
-		cwd: './node_modules/ratchet-npm/dist/fonts',
-		verbose: false
-	})
+
+copy('**','./www/fonts',{
+	cwd: './node_modules/ratchet-npm/dist/fonts',
+	verbose: false
+})
 ])
 .then(()=>console.log('done copying res')).catch(log);
 
