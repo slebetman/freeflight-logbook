@@ -4,16 +4,19 @@ var $ = require('jquery');
 // So we listen to both click and touchstart.
 
 module.exports = function (selector, callback) {
-	var prevScroll = 0;
+	var clicking = false;
 	
 	$(selector).on('touchstart', function(e){
-		prevScroll = $(e.target).offset().top;
+		clicking = true;
+	});
+
+	$(selector).on('touchmove', function(e){
+		clicking = false;
 	});
 	
 	$(selector).on('touchend', function(e){
-		var scroll = $(e.target).offset().top;
-	
-		if (Math.abs(scroll - prevScroll) < 5) {
+		if (clicking) {
+			clicking = false;
 			callback(e);
 		}
 	});
