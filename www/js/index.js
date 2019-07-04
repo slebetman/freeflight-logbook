@@ -18132,7 +18132,6 @@ function loaded () {
 			</div>
 		`);
 	}
-
 	$(window).on('push', function (e) {
 		var pushUrl = url.parse(e.detail.state.url);
 		var path = pushUrl.pathname
@@ -18141,8 +18140,8 @@ function loaded () {
 			
 		if (route[path]) {
 			try {
-				route[path](pushUrl,state);
-			}
+			route[path](pushUrl,state);
+		}
 			catch(err) {
 				console.log('ERROR:', err, err.message);
 				$('.content').html(`
