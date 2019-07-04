@@ -1,7 +1,11 @@
 const moment = require('moment');
 
-function duration (t) {
-	return moment.utc(t).format('mm:ss.SSS');
+function duration (t,msDigits) {
+	var ms = 'SSS'
+	if (msDigits !== undefined) {
+		ms = 'S'.repeat(msDigits);
+	}
+	return moment.utc(t).format('mm:ss.' + ms);
 }
 
 function timestamp (t) {

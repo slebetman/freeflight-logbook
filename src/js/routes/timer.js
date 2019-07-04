@@ -27,7 +27,7 @@ module.exports = function (route, state) {
 
 			running = setInterval(function(){
 				var elapsed = moment().diff(start);
-				$('#timer').text(format.duration(elapsed));
+				$('#timer').text(format.duration(elapsed, 2));
 			},10);
 		}
 		else {
