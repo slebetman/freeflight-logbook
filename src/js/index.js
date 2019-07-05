@@ -18,7 +18,22 @@ var route = {
 	'model': require('./routes/model'),
 	'flight': require('./routes/flight'),
 	'edit_flight': require('./routes/edit_flight'),
+	'log_format_edit' : require('./routes/log_format_edit'),
 	'timer': require('./routes/timer')
+}
+
+function topLevelError (err) {
+	var msg = err.message || err;
+	console.log('ERROR:', msg);
+
+	if (! msg.match(/Uncaught module cordova-plugin.+already defined/)) {
+		$('.content').html(`
+			<div>
+				<h1>ERROR</h1>
+				${msg}
+			</div>
+		`);
+	}
 }
 
 function loaded () {
@@ -26,15 +41,7 @@ function loaded () {
 
 	screen.orientation.lock('portrait');
 
-	window.onerror = function (err) {
-		console.log('ERROR:', err, err.message);
-		$('.content').html(`
-			<div>
-				<h1>ERROR</h1>
-				${err.message}
-			</div>
-		`);
-	}
+	window.onerror = topLevelError;
 	$(window).on('push', function (e) {
 		var pushUrl = url.parse(e.detail.state.url);
 		var path = pushUrl.pathname
@@ -46,13 +53,7 @@ function loaded () {
 			route[path](pushUrl,state);
 		}
 			catch(err) {
-				console.log('ERROR:', err, err.message);
-				$('.content').html(`
-					<div>
-						<h1>ERROR</h1>
-						${err.message}
-					</div>
-				`);
+				topLevelError(err);
 			}
 		}
 		
@@ -68,6 +69,19 @@ function loaded () {
 				e => $(e.target).focus()
 			)
 		);
+
+		[
+			'input[type="radio"]',
+			'label'
+		].forEach(
+			x => $(x).on('touchstart',
+				e => $(e.target).click()
+			)
+		);
+
+		$('div.radio').on('touchstart', e => {
+			$(e.target).find('input[type="radio"]').click()
+		})
 	});
 
 	PUSH({url: 'index.html'}) // Load landing page
