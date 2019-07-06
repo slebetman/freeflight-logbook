@@ -1,5 +1,3 @@
-var brick = require('brick');
-
 /*
  * Log formats simply define which fields are enabled for the log.
  * Logs themselves contain all fields but also contain a field to specify
@@ -10,11 +8,7 @@ var brick = require('brick');
 
 function query (ctx, callback, query, params) {
 	params = params || [];
-	if (query instanceof brick) {
-		params = query.params;
-		query = query.text;
-	}
-	console.log(query);
+	console.log('QUERY > ',query.replace(/\s+/g,' '));
 	ctx.executeSql(query,params,
 		function(ctx,result){
 			console.log(result);
@@ -35,11 +29,7 @@ function query (ctx, callback, query, params) {
 
 function insert (ctx, callback, query, params) {
 	params = params || [];
-	if (query instanceof brick) {
-		params = query.params;
-		query = query.text;
-	}
-	console.log(query);
+	console.log('INSERT > ',query.replace(/\s+/g,' '));
 	ctx.executeSql(query,params,
 		function (ctx, result) {
 			callback(result.insertId);

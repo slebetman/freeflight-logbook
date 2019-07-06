@@ -1,5 +1,3 @@
-var brick = require('brick');
-
 function unpackMeta (callback) {
 	return function (results) {
 		var rows = [].slice.call(results);
@@ -34,12 +32,13 @@ module.exports = function (DB,q,i) {
 				DB.transaction(function(ctx){
 					var meta = JSON.stringify(data.meta) || "{}";
 					i(ctx, callback,
-						brick('INSERT INTO model VALUES (?,?,?,?)',
+						'INSERT INTO model VALUES (?,?,?,?)',
+						[
 							data.name,
 							data.notes,
 							data.picture,
 							meta
-						)
+						]
 					);
 				});
 			},
@@ -47,7 +46,7 @@ module.exports = function (DB,q,i) {
 				DB.transaction(function(ctx){
 					var meta = JSON.stringify(data.meta) || "{}";
 					q(ctx, callback,
-						brick(`
+						`
 							UPDATE model
 							SET
 								name = ?,
@@ -57,19 +56,21 @@ module.exports = function (DB,q,i) {
 							WHERE
 								rowid = ?
 						`,
+						[
 							data.name,
 							data.notes,
 							data.picture,
 							meta,
 							id
-						)
+						]
 					);
 				});
 			},
 			deleteModelById: function (id, callback) {
 				DB.transaction(function(ctx){
 					q(ctx,callback,
-						brick('DELETE FROM model where rowid = ?', id)
+						'DELETE FROM model where rowid = ?',
+						[ id ]
 					);
 				});
 			}

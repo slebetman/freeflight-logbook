@@ -12,7 +12,6 @@
     "license": "BSD-2-Clause",
     "dependencies": {
         "bootstrap": "^3.4.1",
-        "brick": "^2.0.0",
         "browserify": "^14.4.0",
         "copy-newer": "^2.1.2",
         "cordova-android": "^7.1.4",

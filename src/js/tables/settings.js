@@ -1,4 +1,3 @@
-var brick = require('brick');
 var flatten = require('./lib/flatten');
 
 var settings = [
@@ -24,12 +23,12 @@ module.exports = function (DB,q,i) {
 	
 	function initSettings (ctx) {
 		settings.forEach(function(f){
-			var q = brick('INSERT INTO settings VALUES (?,?)',
+			var query = 'INSERT INTO settings VALUES (?,?)';
+			var params = [
 				f.name,
 				f.value
-			).build();
-			console.log(q.text);
-			ctx.executeSql(q.text,q.params);
+			];
+			ctx.executeSql(query,params);
 		});
 	}
 	
@@ -80,16 +79,19 @@ module.exports = function (DB,q,i) {
 			getSetting: function (name,callback) {
 				DB.transaction(function(ctx){
 					q(ctx,flatten('value',callback),
-						brick('SELECT value FROM settings WHERE name = ?',name)
+						'SELECT value FROM settings WHERE name = ?',
+						[ name ]
 					);
 				});
 			},
 			setSetting: function (name, value,callback) {
 				DB.transaction(function(ctx){
 					q(ctx,callback,
-						brick('UPDATE settings SET value = ? WHERE name = ?',
-							value,name
-						)
+						'UPDATE settings SET value = ? WHERE name = ?',
+						[
+							value,
+							name
+						]
 					);
 				});
 			}
