@@ -16,6 +16,7 @@ module.exports = function (route, state) {
 	function loadLogs (callback) {
 		db.logs(model.rowid, function(logs){
 			var fields = model.meta.fields;
+			db.sortByColumnDef(fields);
 			logs.reverse();
 
 			console.log('logs=',logs);

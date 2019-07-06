@@ -4,7 +4,6 @@ var types = [
 	{ name: 'duration', type: 'INTEGER' },
 	{ name: 'distance', type: 'INTEGER' },
 	{ name: 'distance_unit', type: 'TEXT' },
-	{ name: 'location', type: 'TEXT' },
 	{ name: 'windings', type: 'INTEGER' },
 	{ name: 'backoff', type: 'INTEGER' },
 	{ name: 'torque', type: 'DOUBLE' },
@@ -15,12 +14,19 @@ var types = [
 	{ name: 'rubber_width_unit', type: 'TEXT' },
 	{ name: 'rubber_weight', type: 'DOUBLE' },
 	{ name: 'rubber_weight_unit', type: 'TEXT' },
+	{ name: 'location', type: 'TEXT' },
 	{ name: 'notes', type: 'TEXT' }
 ]
 
 var columns = types.map(t => t.name);
 
 var formats = columns.filter(x => !x.match(/_unit$/));
+
+var columnPriority = {};
+
+for (var i=0; i<columns.length; i++) {
+	columnPriority[columns[i]] = i;
+}
 
 function getValue(data, column) {
 	var val = data[column];
@@ -31,8 +37,6 @@ module.exports = function (DB,q,i) {
 	
 	return {
 		name: 'log',
-		columns: columns,
-		formats: formats,
 		create: function (ctx) {
 			ctx.executeSql(
 				'CREATE TABLE IF NOT EXISTS log (' +
@@ -41,6 +45,17 @@ module.exports = function (DB,q,i) {
 			);
 		},
 		methods: {
+			logColumnDef: function () {
+				return columns;
+			},
+			logFormatDef: function () {
+				return formats;
+			},
+			sortByColumnDef: function (arr) {
+				arr.sort((a,b) => {
+					return columnPriority[a] - columnPriority[b];
+				});
+			},
 			logs: function (model_id, callback) {
 				DB.transaction(function(ctx){
 					q(ctx, callback,`
@@ -50,7 +65,7 @@ module.exports = function (DB,q,i) {
 						FROM log
 							where model = ?
 						`,
-						model_id
+						[ model_id ]
 					);
 				});
 			},
@@ -63,7 +78,7 @@ module.exports = function (DB,q,i) {
 						FROM log
 							where rowid = ?
 						`,
-						rowid
+						[ rowid ]
 					);
 				});
 			},
