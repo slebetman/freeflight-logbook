@@ -1,5 +1,3 @@
-var brick = require('brick');
-
 /*
  * Log formats simply define which fields are enabled for the log.
  * Logs themselves contain all fields but also contain a field to specify
@@ -8,13 +6,9 @@ var brick = require('brick');
  * But how to support custom fields?
  */
 
-function query (ctx, callback, query) {
-	var params = [];
-	if (query instanceof brick) {
-		params = query.params;
-		query = query.text;
-	}
-	console.log(query);
+function query (ctx, callback, query, params) {
+	params = params || [];
+	console.log('QUERY > ',query.replace(/\s+/g,' '),JSON.stringify(params));
 	ctx.executeSql(query,params,
 		function(ctx,result){
 			console.log(result);
@@ -33,13 +27,9 @@ function query (ctx, callback, query) {
 	);
 }
 
-function insert (ctx, callback, query) {
-	var params = [];
-	if (query instanceof brick) {
-		params = query.params;
-		query = query.text;
-	}
-	console.log(query);
+function insert (ctx, callback, query, params) {
+	params = params || [];
+	console.log('INSERT > ',query.replace(/\s+/g,' '),JSON.stringify(params));
 	ctx.executeSql(query,params,
 		function (ctx, result) {
 			callback(result.insertId);

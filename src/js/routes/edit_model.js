@@ -8,15 +8,22 @@ var page = require('../../templates/edit_model');
 module.exports = function (route, state) {
 	console.log('EDIT MODEL CONTROLLER');
 
-	if (typeof state.selected_log_format == 'undefined') {
-		state.selected_log_format = 0;
-	}
-
 	state.previousPage = route.pathname;
 	
 	console.log(state);
 	
 	var model = state.selected_model;
+
+	if (typeof state.selected_log_format == 'undefined') {
+		if (model.meta.formatId) {
+			state.selected_log_format = model.meta.formatId;
+			state.selected_log_format_name = model.meta.format;
+		}
+		else {
+			state.selected_log_format = 1;
+			state.selected_log_format_name = 'Simple';
+		}
+	}
 
 	$('.title').text(model.name);
 	$('.log-format').text(state.selected_log_format_name || model.meta.format);
@@ -80,7 +87,8 @@ module.exports = function (route, state) {
 
 				formData.meta = {
 					fields: format.fields,
-					format: state.selected_log_format_name
+					format: state.selected_log_format_name,
+					formatId: state.selected_log_format
 				};
 	
 				console.log('model=',formData);

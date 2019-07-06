@@ -9,11 +9,8 @@ var page = require('../../templates/index');
 module.exports = function (route, state) {
 	console.log('LANDING PAGE');
 
-	if (typeof state.selected_log_format == 'undefined') {
-		state.selected_log_format = 0;
-	}
-
 	state.previousPage = route.pathname;
+	state.selected_log_format = undefined;
 	
 	console.log(state);
 	

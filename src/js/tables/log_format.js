@@ -1,4 +1,3 @@
-var brick = require('brick');
 var formats = require('./lib/built_in_log_formats.json');
 var flatten = require('./lib/flatten');
 
@@ -6,12 +5,9 @@ module.exports = function (DB,q,i) {
 	
 	function initLogFormat (ctx) {
 		formats.forEach(function(f){
-			var q = brick('INSERT INTO log_format VALUES (?,?)',
-				f.name,
-				JSON.stringify(f.meta)
-			).build();
-			console.log(q.text);
-			ctx.executeSql(q.text,q.params);
+			var query = 'INSERT INTO log_format VALUES (?,?)';
+			var params = [ f.name, JSON.stringify(f.meta) ];
+			ctx.executeSql(query,params);
 		});
 	}
 	
@@ -66,7 +62,8 @@ module.exports = function (DB,q,i) {
 			getFormatName: function (rowid, callback) {
 				DB.transaction(function(ctx){
 					q(ctx,flatten('name',callback),
-						brick('SELECT name FROM log_format where rowid = ?',rowid)
+						'SELECT name FROM log_format where rowid = ?',
+						[ rowid ]
 					);
 				});
 			},
@@ -75,7 +72,8 @@ module.exports = function (DB,q,i) {
 					q(ctx,flatten('meta',function(meta){
 						callback(JSON.parse(meta));
 					}),
-						brick('SELECT meta FROM log_format where rowid = ?',rowid)
+						'SELECT meta FROM log_format where rowid = ?',
+						[ rowid ]
 					);
 				});
 			}

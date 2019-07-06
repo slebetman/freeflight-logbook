@@ -9,8 +9,11 @@ module.exports = function (route, state) {
 	console.log('ADD MODEL CONTROLLER');
 
 	if (typeof state.selected_log_format == 'undefined') {
-		state.selected_log_format = 0;
+		state.selected_log_format = 1;
+		state.selected_log_format_name = 'Simple';
 	}
+
+	$('.log-format').text(state.selected_log_format_name);
 
 	state.previousPage = route.pathname;
 	
@@ -45,7 +48,6 @@ module.exports = function (route, state) {
 	page.handlePictureUpload(function(){
 		camera.getPicture(function(img){
 			var url = 'data:image/jpeg;base64,' + img;
-			console.log('image size=',url.length);
 			$('.plane-pic').attr('src', url);
 			$('.click-instruction').hide();
 		});
@@ -55,7 +57,7 @@ module.exports = function (route, state) {
 		console.log('save model');
 
 		var model = page.getValues();
-		console.log('log format=',state.selected_log_format);
+		console.log('log format=',state.selected_log_format, 'name=', state.selected_log_format_name);
 
 		if (model.name == "") {
 			alert.error('Please enter model name');
@@ -66,10 +68,11 @@ module.exports = function (route, state) {
 
 				model.meta = {
 					fields: format.fields,
-					format: state.selected_log_format_name
+					format: state.selected_log_format_name,
+					formatId: state.selected_log_format
 				};
 	
-				console.log('model=',model);
+				console.log('model=',JSON.stringify(model,null,2));
 
 				db.addModel(model,function(){
 					goBack();

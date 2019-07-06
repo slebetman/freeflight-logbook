@@ -35,7 +35,7 @@ function saveSelectedFormat (selected, name, from, state, callback) {
 	switch (from) {
 		case '/settings':
 			db.setSetting('defaultFormat',selected.toString(),callback);
-			break;
+			// no break! continue to set state:
 		case '/edit_model':
 		case '/add_model':
 			state.selected_log_format = selected;
@@ -63,6 +63,10 @@ module.exports = function (route, state) {
 	
 		loadSelectedFormat(from, state, selectedFormat => {
 			checkSelection(selectedFormat);
+			state.selected_log_format = selectedFormat;
+			state.selected_log_format_name = formats
+				.filter(x => x.rowid == selectedFormat)
+				.map(x => x.name)[0];
 			
 			onclick('#back', function(){
 				console.log('back button');
