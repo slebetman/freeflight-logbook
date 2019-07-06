@@ -8,8 +8,8 @@ var brick = require('brick');
  * But how to support custom fields?
  */
 
-function query (ctx, callback, query) {
-	var params = [];
+function query (ctx, callback, query, params) {
+	params = params || [];
 	if (query instanceof brick) {
 		params = query.params;
 		query = query.text;
@@ -33,8 +33,8 @@ function query (ctx, callback, query) {
 	);
 }
 
-function insert (ctx, callback, query) {
-	var params = [];
+function insert (ctx, callback, query, params) {
+	params = params || [];
 	if (query instanceof brick) {
 		params = query.params;
 		query = query.text;

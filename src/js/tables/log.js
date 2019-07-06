@@ -1,34 +1,49 @@
-var brick = require('brick');
+var types = [
+	{ name: 'model', type: 'INTEGER' },
+	{ name: 'timestamp', type: 'INTEGER' },
+	{ name: 'duration', type: 'INTEGER' },
+	{ name: 'distance', type: 'INTEGER' },
+	{ name: 'distance_unit', type: 'TEXT' },
+	{ name: 'location', type: 'TEXT' },
+	{ name: 'windings', type: 'INTEGER' },
+	{ name: 'backoff', type: 'INTEGER' },
+	{ name: 'torque', type: 'DOUBLE' },
+	{ name: 'torque_unit', type: 'TEXT' },
+	{ name: 'rubber_length', type: 'TEXT' },
+	{ name: 'rubber_length_unit', type: 'TEXT' },
+	{ name: 'rubber_width', type: 'TEXT' },
+	{ name: 'rubber_width_unit', type: 'TEXT' },
+	{ name: 'rubber_weight', type: 'DOUBLE' },
+	{ name: 'rubber_weight_unit', type: 'TEXT' },
+	{ name: 'notes', type: 'TEXT' }
+]
+
+var columns = types.map(t => t.name);
+
+var formats = columns.filter(x => !x.match(/_unit$/));
+
+function getValue(data, column) {
+	var val = data[column];
+	return val === undefined? '' : val;
+}
 
 module.exports = function (DB,q,i) {
 	
 	return {
 		name: 'log',
+		columns: columns,
+		formats: formats,
 		create: function (ctx) {
-			ctx.executeSql(`CREATE TABLE IF NOT EXISTS log (
-				model INTEGER,
-				timestamp INTEGER,
-				duration INTEGER,
-				distance INTEGER,
-				distance_unit TEXT,
-				location TEXT,
-				windings INTEGER,
-				backoff INTEGER,
-				torque DOUBLE,
-				torque_unit TEXT,
-				rubber_length TEXT,
-				rubber_length_unit TEXT,
-				rubber_width TEXT,
-				rubber_width_unit TEXT,
-				rubber_weight DOUBLE,
-				rubber_weight_unit TEXT,
-				notes TEXT
-			)`);
+			ctx.executeSql(
+				'CREATE TABLE IF NOT EXISTS log (' +
+					types.map(t => `${t.name} ${t.type}`).join(',') +
+				')'
+			);
 		},
 		methods: {
 			logs: function (model_id, callback) {
 				DB.transaction(function(ctx){
-					q(ctx, callback,brick(`
+					q(ctx, callback,`
 						SELECT
 							rowid,
 							*
@@ -36,12 +51,12 @@ module.exports = function (DB,q,i) {
 							where model = ?
 						`,
 						model_id
-					));
+					);
 				});
 			},
 			getLogById: function (rowid, callback) {
 				DB.transaction(function(ctx){
-					q(ctx, row => callback(row[0]),brick(`
+					q(ctx, row => callback(row[0]),`
 						SELECT
 							rowid,
 							*
@@ -49,24 +64,24 @@ module.exports = function (DB,q,i) {
 							where rowid = ?
 						`,
 						rowid
-					));
+					);
 				});
 			},
 			getLocations: function(callback) {
 				DB.transaction(function(ctx){
 					q(ctx, function(r){
 						callback(r.map(function(x){return x.location}));
-					}, brick(`
+					}, `
 						SELECT DISTINCT 
 							location
 						FROM log
 						`
-					));
+					);
 				});
 			},
 			getLogCount: function (callback) {
 				DB.transaction(function(ctx){
-					q(ctx, callback, brick(`
+					q(ctx, callback, `
 						SELECT
 							model, 
 							count(rowid) as logs
@@ -74,80 +89,56 @@ module.exports = function (DB,q,i) {
 						GROUP BY
 							model
 						`
-					));
+					);
 				});
 			},
 			deleteLogByModel: function(model_id, callback) {
 				DB.transaction(function(ctx){
-					q(ctx, callback, brick(`
+					q(ctx, callback, `
 						DELETE FROM log
 						WHERE
 							model = ?
 						`,
 						model_id
-					));
+					);
 				});
 			},
 			addLog: function (data, callback) {
+				var query = 'INSERT INTO log (' + 
+						columns.map(c => c).join(',') +
+					') VALUES (' + 
+						columns.map(() => '?').join(',') +
+					')';
+
+				var params = columns.map(c => getValue(data,c));
+
 				DB.transaction(function(ctx){
-					i(ctx, callback,
-						brick('INSERT INTO log VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
-							data.model,
-							data.timestamp,
-							data.duration,
-							data.distance,
-							data.distance_unit,
-							data.location,
-							data.windings,
-							data.backoff,
-							data.torque,
-							data.torque_unit,
-							data.rubber_length,
-							data.rubber_length_unit,
-							data.rubber_width,
-							data.rubber_width_unit,
-							data.rubber_weight,
-							data.rubber_weight_unit,
-							data.notes
-						)
-					);
+					i(ctx, callback, query, params);
 				});
 			},
 			saveLog: function (rowid, data, callback) {
+				var updates = columns.filter(c => {
+					switch (c) {
+						case 'model':
+						case 'timestamp':
+						case 'duration':
+						case 'distance':
+						case 'distance_unit':
+							return false;
+						default:
+							return true;
+					}
+				});
+
+				var query = 'UPDATE log SET ' + 
+						updates.map(c => c + ' = ?').join(',') +
+					' WHERE rowid = ?';
+
+				var params = updates.map(c => getValue(data,c));
+				params.push(rowid);
+
 				DB.transaction(function(ctx){
-					q(ctx, callback,
-						brick(`
-							UPDATE log
-							SET
-								location = ?,
-								windings = ?,
-								backoff = ?,
-								torque = ?,
-								torque_unit = ?,
-								rubber_length = ?,
-								rubber_length_unit = ?,
-								rubber_width = ?,
-								rubber_width_unit = ?,
-								rubber_weight = ?,
-								rubber_weight_unit = ?,
-								notes = ?
-							WHERE rowid = ?
-						`,
-							data.location,
-							data.windings,
-							data.backoff,
-							data.torque,
-							data.torque_unit,
-							data.rubber_length,
-							data.rubber_length_unit,
-							data.rubber_width,
-							data.rubber_width_unit,
-							data.rubber_weight,
-							data.rubber_weight_unit,
-							data.notes,
-							rowid
-						)
-					);
+					q(ctx, callback, query, params);
 				});
 			}
 		}
