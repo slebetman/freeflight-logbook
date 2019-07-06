@@ -1436,3 +1436,14 @@ form#new-flight li.table-view-cell {
   font-weight: bold;
   font-size: 14pt;
 }
+li.table-view-cell.log-value-type .segmented-control {
+  border-radius: 5px;
+}
+li.table-view-cell.log-value-type .segmented-control a {
+  height: 3em;
+  vertical-align: middle;
+}
+li.table-view-cell.log-value-type .segmented-control .control-item.active {
+  background-color: #5cb85c;
+  color: white;
+}

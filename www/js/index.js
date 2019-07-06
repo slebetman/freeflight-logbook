@@ -1,222 +1,4 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
-var slice = Array.prototype.slice
-var concat = Array.prototype.concat
-
-var Brick = function() {
-  var args = slice.call(arguments)
-
-  if (!Brick.isBrick(this)) {
-    var brick = Object.create(Brick.prototype)
-    return Brick.apply(brick, args) || brick
-  }
-
-  var text = []
-  if (args.length) { text = text.concat(args[0]) }
-  var params = args.slice(1)
-
-  this.text = text.reduce(function(memo, item) {
-    if (Brick.isBrick(item)) {
-      params = params.concat(item.params)
-      return memo.concat(item.text)
-    } else {
-      return memo.concat(item)
-    }
-  }, [])
-
-  this.params = params
-}
-
-Brick.defaults = {
-  builder: null
-}
-
-Brick.isBrick = function(brick) {
- return typeof brick === 'object' && brick instanceof Brick
-}
-
-Brick.join = function(items, separator) {
-  return new Brick(items.reduce(function(memo, item, index) {
-    return memo.concat(index ? [separator, item] : item)
-  }, []))
-}
-
-Brick.map = function(object, separator) {
-  return Object.keys(object).map(function(key) {
-    var value = object[key]
-
-    if (Brick.isBrick(value)) {
-      return value
-    }
-
-    if (typeof separator === 'function') {
-      return separator(key, value)
-    }
-
-    return new Brick([key, separator, '?'], value)
-  })
-}
-
-Brick.where = function(object) {
-  var bricks = Brick.map(object, Brick.fn.equals)
-  return Brick.join(bricks, 'AND')
-}
-
-Brick.conditions = function(object) {
-  return Brick.join(Object.keys(object).map(function(key) {
-    return Brick.fn.equals(key, object[key])
-  }), 'AND')
-}
-
-Brick.namespace = function(namespace, value) {
-  var fn = function(value) { return Brick.fn.namespace(namespace, value) }
-  if (!value) { return fn }
-  if (typeof value === 'object') {
-    if (Array.isArray(value)) { return value.map(fn) }
-    return Object.keys(value).reduce(function(memo, key) {
-      memo[fn(key)] = value[key]
-      return memo
-    }, {})
-  } else {
-   return fn(value)
-  }
-}
-
-Brick.equal = function() {
-  return slice.call(arguments).map(function(brick) {
-    return brick.build()
-  }).reduce(function(a, b) {
-    return JSON.stringify(a) === JSON.stringify(b)
-  })
-}
-
-Brick.fn = {}
-
-Brick.fn.operator = function(operator, key, value) {
-  var fn = function(key, value) {
-    if (value === null) {
-      return new Brick([key, 'IS NULL'])
-    } else if (Brick.isBrick(value)) {
-      return value
-    } else {
-      return new Brick([key, operator, '?'], value)
-    }
-  }
-  var args = slice.call(arguments, 1)
-  if (!args.length) { return fn }
-  return fn.apply(null, args)
-}
-
-Brick.fn.equals = Brick.fn.operator('=')
-
-Brick.fn.and = function(key, value) {
-  return new Brick([key, 'AND', value])
-}
-
-Brick.fn.or = function(key, value) {
-  return new Brick([key, 'OR', value])
-}
-
-Brick.fn.wrap = function(item) {
-  return new Brick('(?)', item)
-}
-
-Brick.fn.join = function(separator, key, value) {
-  var join = function(items) {
-    return Brick.join(items, separator)
-  }
-  var items = slice.call(arguments, 1)
-  if (!items.length) { return join }
-  return join(items)
-}
-
-Brick.fn.namespace = function() {
-  var parts = slice.call(arguments)
-  return parts.filter(function(part) {
-    return !!part
-  }).join('.')
-}
-
-Brick.builders = {}
-
-Brick.builders.pg = function(query) {
-  var params = []
-
-  // Replace parameter placeholders with $1, $2, etc.
-  var text = query.params.reduce(function(memo, param) {
-    var index = params.indexOf(param)
-    if (index === -1) {
-      index = params.length
-      params.push(param);
-    }
-    var placeholder = '$' + (index + 1)
-    return memo.replace('?', placeholder)
-  }, query.text)
-
-  return {
-    text: text,
-    values: params
-  }
-}
-
-Brick.prototype._build = function() {
-  // Make a copy of params
-  var params = this.params.slice()
-
-  // Join text array into a single string
-  var text = this.text.join(' ')
-
-  var left = '', right = text
-
-  // Loop through params array, build any bricks that we find, and import
-  // their contents.
-  params = params.reduce(function(memo, param) {
-    var placeholder = '?'
-    if (Brick.isBrick(param)) {
-      var result = param._build()
-      placeholder = result.text
-      param = result.params
-    }
-    memo = memo.concat(param)
-    if (right) {
-      var index = right.indexOf('?')
-      if (index !== -1) {
-        left = left + right.substr(0, index) + placeholder
-        right = right.substr(index + 1)
-      }
-    }
-    return memo
-  }, [])
-
-  text = left + right
-
-  return {
-    text: text,
-    params: params
-  }
-}
-
-Brick.prototype.build = function(builder) {
-  builder = builder || Brick.defaults.builder
-  var result = this._build()
-  if (typeof Brick.builders[builder] === 'function') {
-    return Brick.builders[builder](result)
-  } else {
-    return result
-  }
-}
-
-Brick.prototype.toString = function() {
-  var brick = this._build();
-  var string = [brick.text].concat(brick.params).map(function(part) {
-    return JSON.stringify(part)
-  }).join(', ')
-
-  return '[brick ' + string + ']'
-}
-
-module.exports = Brick
-
-},{}],2:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v3.4.1
  * https://jquery.com/
@@ -10816,6 +10598,509 @@ if ( !noGlobal ) {
 return jQuery;
 } );
 
+},{}],2:[function(require,module,exports){
+// Copyright (c) 2013 Pieroxy <pieroxy@pieroxy.net>
+// This work is free. You can redistribute it and/or modify it
+// under the terms of the WTFPL, Version 2
+// For more information see LICENSE.txt or http://www.wtfpl.net/
+//
+// For more information, the home page:
+// http://pieroxy.net/blog/pages/lz-string/testing.html
+//
+// LZ-based compression algorithm, version 1.4.4
+var LZString = (function() {
+
+// private property
+var f = String.fromCharCode;
+var keyStrBase64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+var keyStrUriSafe = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-$";
+var baseReverseDic = {};
+
+function getBaseValue(alphabet, character) {
+  if (!baseReverseDic[alphabet]) {
+    baseReverseDic[alphabet] = {};
+    for (var i=0 ; i<alphabet.length ; i++) {
+      baseReverseDic[alphabet][alphabet.charAt(i)] = i;
+    }
+  }
+  return baseReverseDic[alphabet][character];
+}
+
+var LZString = {
+  compressToBase64 : function (input) {
+    if (input == null) return "";
+    var res = LZString._compress(input, 6, function(a){return keyStrBase64.charAt(a);});
+    switch (res.length % 4) { // To produce valid Base64
+    default: // When could this happen ?
+    case 0 : return res;
+    case 1 : return res+"===";
+    case 2 : return res+"==";
+    case 3 : return res+"=";
+    }
+  },
+
+  decompressFromBase64 : function (input) {
+    if (input == null) return "";
+    if (input == "") return null;
+    return LZString._decompress(input.length, 32, function(index) { return getBaseValue(keyStrBase64, input.charAt(index)); });
+  },
+
+  compressToUTF16 : function (input) {
+    if (input == null) return "";
+    return LZString._compress(input, 15, function(a){return f(a+32);}) + " ";
+  },
+
+  decompressFromUTF16: function (compressed) {
+    if (compressed == null) return "";
+    if (compressed == "") return null;
+    return LZString._decompress(compressed.length, 16384, function(index) { return compressed.charCodeAt(index) - 32; });
+  },
+
+  //compress into uint8array (UCS-2 big endian format)
+  compressToUint8Array: function (uncompressed) {
+    var compressed = LZString.compress(uncompressed);
+    var buf=new Uint8Array(compressed.length*2); // 2 bytes per character
+
+    for (var i=0, TotalLen=compressed.length; i<TotalLen; i++) {
+      var current_value = compressed.charCodeAt(i);
+      buf[i*2] = current_value >>> 8;
+      buf[i*2+1] = current_value % 256;
+    }
+    return buf;
+  },
+
+  //decompress from uint8array (UCS-2 big endian format)
+  decompressFromUint8Array:function (compressed) {
+    if (compressed===null || compressed===undefined){
+        return LZString.decompress(compressed);
+    } else {
+        var buf=new Array(compressed.length/2); // 2 bytes per character
+        for (var i=0, TotalLen=buf.length; i<TotalLen; i++) {
+          buf[i]=compressed[i*2]*256+compressed[i*2+1];
+        }
+
+        var result = [];
+        buf.forEach(function (c) {
+          result.push(f(c));
+        });
+        return LZString.decompress(result.join(''));
+
+    }
+
+  },
+
+
+  //compress into a string that is already URI encoded
+  compressToEncodedURIComponent: function (input) {
+    if (input == null) return "";
+    return LZString._compress(input, 6, function(a){return keyStrUriSafe.charAt(a);});
+  },
+
+  //decompress from an output of compressToEncodedURIComponent
+  decompressFromEncodedURIComponent:function (input) {
+    if (input == null) return "";
+    if (input == "") return null;
+    input = input.replace(/ /g, "+");
+    return LZString._decompress(input.length, 32, function(index) { return getBaseValue(keyStrUriSafe, input.charAt(index)); });
+  },
+
+  compress: function (uncompressed) {
+    return LZString._compress(uncompressed, 16, function(a){return f(a);});
+  },
+  _compress: function (uncompressed, bitsPerChar, getCharFromInt) {
+    if (uncompressed == null) return "";
+    var i, value,
+        context_dictionary= {},
+        context_dictionaryToCreate= {},
+        context_c="",
+        context_wc="",
+        context_w="",
+        context_enlargeIn= 2, // Compensate for the first entry which should not count
+        context_dictSize= 3,
+        context_numBits= 2,
+        context_data=[],
+        context_data_val=0,
+        context_data_position=0,
+        ii;
+
+    for (ii = 0; ii < uncompressed.length; ii += 1) {
+      context_c = uncompressed.charAt(ii);
+      if (!Object.prototype.hasOwnProperty.call(context_dictionary,context_c)) {
+        context_dictionary[context_c] = context_dictSize++;
+        context_dictionaryToCreate[context_c] = true;
+      }
+
+      context_wc = context_w + context_c;
+      if (Object.prototype.hasOwnProperty.call(context_dictionary,context_wc)) {
+        context_w = context_wc;
+      } else {
+        if (Object.prototype.hasOwnProperty.call(context_dictionaryToCreate,context_w)) {
+          if (context_w.charCodeAt(0)<256) {
+            for (i=0 ; i<context_numBits ; i++) {
+              context_data_val = (context_data_val << 1);
+              if (context_data_position == bitsPerChar-1) {
+                context_data_position = 0;
+                context_data.push(getCharFromInt(context_data_val));
+                context_data_val = 0;
+              } else {
+                context_data_position++;
+              }
+            }
+            value = context_w.charCodeAt(0);
+            for (i=0 ; i<8 ; i++) {
+              context_data_val = (context_data_val << 1) | (value&1);
+              if (context_data_position == bitsPerChar-1) {
+                context_data_position = 0;
+                context_data.push(getCharFromInt(context_data_val));
+                context_data_val = 0;
+              } else {
+                context_data_position++;
+              }
+              value = value >> 1;
+            }
+          } else {
+            value = 1;
+            for (i=0 ; i<context_numBits ; i++) {
+              context_data_val = (context_data_val << 1) | value;
+              if (context_data_position ==bitsPerChar-1) {
+                context_data_position = 0;
+                context_data.push(getCharFromInt(context_data_val));
+                context_data_val = 0;
+              } else {
+                context_data_position++;
+              }
+              value = 0;
+            }
+            value = context_w.charCodeAt(0);
+            for (i=0 ; i<16 ; i++) {
+              context_data_val = (context_data_val << 1) | (value&1);
+              if (context_data_position == bitsPerChar-1) {
+                context_data_position = 0;
+                context_data.push(getCharFromInt(context_data_val));
+                context_data_val = 0;
+              } else {
+                context_data_position++;
+              }
+              value = value >> 1;
+            }
+          }
+          context_enlargeIn--;
+          if (context_enlargeIn == 0) {
+            context_enlargeIn = Math.pow(2, context_numBits);
+            context_numBits++;
+          }
+          delete context_dictionaryToCreate[context_w];
+        } else {
+          value = context_dictionary[context_w];
+          for (i=0 ; i<context_numBits ; i++) {
+            context_data_val = (context_data_val << 1) | (value&1);
+            if (context_data_position == bitsPerChar-1) {
+              context_data_position = 0;
+              context_data.push(getCharFromInt(context_data_val));
+              context_data_val = 0;
+            } else {
+              context_data_position++;
+            }
+            value = value >> 1;
+          }
+
+
+        }
+        context_enlargeIn--;
+        if (context_enlargeIn == 0) {
+          context_enlargeIn = Math.pow(2, context_numBits);
+          context_numBits++;
+        }
+        // Add wc to the dictionary.
+        context_dictionary[context_wc] = context_dictSize++;
+        context_w = String(context_c);
+      }
+    }
+
+    // Output the code for w.
+    if (context_w !== "") {
+      if (Object.prototype.hasOwnProperty.call(context_dictionaryToCreate,context_w)) {
+        if (context_w.charCodeAt(0)<256) {
+          for (i=0 ; i<context_numBits ; i++) {
+            context_data_val = (context_data_val << 1);
+            if (context_data_position == bitsPerChar-1) {
+              context_data_position = 0;
+              context_data.push(getCharFromInt(context_data_val));
+              context_data_val = 0;
+            } else {
+              context_data_position++;
+            }
+          }
+          value = context_w.charCodeAt(0);
+          for (i=0 ; i<8 ; i++) {
+            context_data_val = (context_data_val << 1) | (value&1);
+            if (context_data_position == bitsPerChar-1) {
+              context_data_position = 0;
+              context_data.push(getCharFromInt(context_data_val));
+              context_data_val = 0;
+            } else {
+              context_data_position++;
+            }
+            value = value >> 1;
+          }
+        } else {
+          value = 1;
+          for (i=0 ; i<context_numBits ; i++) {
+            context_data_val = (context_data_val << 1) | value;
+            if (context_data_position == bitsPerChar-1) {
+              context_data_position = 0;
+              context_data.push(getCharFromInt(context_data_val));
+              context_data_val = 0;
+            } else {
+              context_data_position++;
+            }
+            value = 0;
+          }
+          value = context_w.charCodeAt(0);
+          for (i=0 ; i<16 ; i++) {
+            context_data_val = (context_data_val << 1) | (value&1);
+            if (context_data_position == bitsPerChar-1) {
+              context_data_position = 0;
+              context_data.push(getCharFromInt(context_data_val));
+              context_data_val = 0;
+            } else {
+              context_data_position++;
+            }
+            value = value >> 1;
+          }
+        }
+        context_enlargeIn--;
+        if (context_enlargeIn == 0) {
+          context_enlargeIn = Math.pow(2, context_numBits);
+          context_numBits++;
+        }
+        delete context_dictionaryToCreate[context_w];
+      } else {
+        value = context_dictionary[context_w];
+        for (i=0 ; i<context_numBits ; i++) {
+          context_data_val = (context_data_val << 1) | (value&1);
+          if (context_data_position == bitsPerChar-1) {
+            context_data_position = 0;
+            context_data.push(getCharFromInt(context_data_val));
+            context_data_val = 0;
+          } else {
+            context_data_position++;
+          }
+          value = value >> 1;
+        }
+
+
+      }
+      context_enlargeIn--;
+      if (context_enlargeIn == 0) {
+        context_enlargeIn = Math.pow(2, context_numBits);
+        context_numBits++;
+      }
+    }
+
+    // Mark the end of the stream
+    value = 2;
+    for (i=0 ; i<context_numBits ; i++) {
+      context_data_val = (context_data_val << 1) | (value&1);
+      if (context_data_position == bitsPerChar-1) {
+        context_data_position = 0;
+        context_data.push(getCharFromInt(context_data_val));
+        context_data_val = 0;
+      } else {
+        context_data_position++;
+      }
+      value = value >> 1;
+    }
+
+    // Flush the last char
+    while (true) {
+      context_data_val = (context_data_val << 1);
+      if (context_data_position == bitsPerChar-1) {
+        context_data.push(getCharFromInt(context_data_val));
+        break;
+      }
+      else context_data_position++;
+    }
+    return context_data.join('');
+  },
+
+  decompress: function (compressed) {
+    if (compressed == null) return "";
+    if (compressed == "") return null;
+    return LZString._decompress(compressed.length, 32768, function(index) { return compressed.charCodeAt(index); });
+  },
+
+  _decompress: function (length, resetValue, getNextValue) {
+    var dictionary = [],
+        next,
+        enlargeIn = 4,
+        dictSize = 4,
+        numBits = 3,
+        entry = "",
+        result = [],
+        i,
+        w,
+        bits, resb, maxpower, power,
+        c,
+        data = {val:getNextValue(0), position:resetValue, index:1};
+
+    for (i = 0; i < 3; i += 1) {
+      dictionary[i] = i;
+    }
+
+    bits = 0;
+    maxpower = Math.pow(2,2);
+    power=1;
+    while (power!=maxpower) {
+      resb = data.val & data.position;
+      data.position >>= 1;
+      if (data.position == 0) {
+        data.position = resetValue;
+        data.val = getNextValue(data.index++);
+      }
+      bits |= (resb>0 ? 1 : 0) * power;
+      power <<= 1;
+    }
+
+    switch (next = bits) {
+      case 0:
+          bits = 0;
+          maxpower = Math.pow(2,8);
+          power=1;
+          while (power!=maxpower) {
+            resb = data.val & data.position;
+            data.position >>= 1;
+            if (data.position == 0) {
+              data.position = resetValue;
+              data.val = getNextValue(data.index++);
+            }
+            bits |= (resb>0 ? 1 : 0) * power;
+            power <<= 1;
+          }
+        c = f(bits);
+        break;
+      case 1:
+          bits = 0;
+          maxpower = Math.pow(2,16);
+          power=1;
+          while (power!=maxpower) {
+            resb = data.val & data.position;
+            data.position >>= 1;
+            if (data.position == 0) {
+              data.position = resetValue;
+              data.val = getNextValue(data.index++);
+            }
+            bits |= (resb>0 ? 1 : 0) * power;
+            power <<= 1;
+          }
+        c = f(bits);
+        break;
+      case 2:
+        return "";
+    }
+    dictionary[3] = c;
+    w = c;
+    result.push(c);
+    while (true) {
+      if (data.index > length) {
+        return "";
+      }
+
+      bits = 0;
+      maxpower = Math.pow(2,numBits);
+      power=1;
+      while (power!=maxpower) {
+        resb = data.val & data.position;
+        data.position >>= 1;
+        if (data.position == 0) {
+          data.position = resetValue;
+          data.val = getNextValue(data.index++);
+        }
+        bits |= (resb>0 ? 1 : 0) * power;
+        power <<= 1;
+      }
+
+      switch (c = bits) {
+        case 0:
+          bits = 0;
+          maxpower = Math.pow(2,8);
+          power=1;
+          while (power!=maxpower) {
+            resb = data.val & data.position;
+            data.position >>= 1;
+            if (data.position == 0) {
+              data.position = resetValue;
+              data.val = getNextValue(data.index++);
+            }
+            bits |= (resb>0 ? 1 : 0) * power;
+            power <<= 1;
+          }
+
+          dictionary[dictSize++] = f(bits);
+          c = dictSize-1;
+          enlargeIn--;
+          break;
+        case 1:
+          bits = 0;
+          maxpower = Math.pow(2,16);
+          power=1;
+          while (power!=maxpower) {
+            resb = data.val & data.position;
+            data.position >>= 1;
+            if (data.position == 0) {
+              data.position = resetValue;
+              data.val = getNextValue(data.index++);
+            }
+            bits |= (resb>0 ? 1 : 0) * power;
+            power <<= 1;
+          }
+          dictionary[dictSize++] = f(bits);
+          c = dictSize-1;
+          enlargeIn--;
+          break;
+        case 2:
+          return result.join('');
+      }
+
+      if (enlargeIn == 0) {
+        enlargeIn = Math.pow(2, numBits);
+        numBits++;
+      }
+
+      if (dictionary[c]) {
+        entry = dictionary[c];
+      } else {
+        if (c === dictSize) {
+          entry = w + w.charAt(0);
+        } else {
+          return null;
+        }
+      }
+      result.push(entry);
+
+      // Add w+entry[0] to the dictionary.
+      dictionary[dictSize++] = w + entry.charAt(0);
+      enlargeIn--;
+
+      w = entry;
+
+      if (enlargeIn == 0) {
+        enlargeIn = Math.pow(2, numBits);
+        numBits++;
+      }
+
+    }
+  }
+};
+  return LZString;
+})();
+
+if (typeof define === 'function' && define.amd) {
+  define(function () { return LZString; });
+} else if( typeof module !== 'undefined' && module != null ) {
+  module.exports = LZString
+}
+
 },{}],3:[function(require,module,exports){
 //! moment.js
 
@@ -17963,8 +18248,6 @@ module.exports = {
 };
 
 },{}],11:[function(require,module,exports){
-var brick = require('brick');
-
 /*
  * Log formats simply define which fields are enabled for the log.
  * Logs themselves contain all fields but also contain a field to specify
@@ -17973,13 +18256,9 @@ var brick = require('brick');
  * But how to support custom fields?
  */
 
-function query (ctx, callback, query) {
-	var params = [];
-	if (query instanceof brick) {
-		params = query.params;
-		query = query.text;
-	}
-	console.log(query);
+function query (ctx, callback, query, params) {
+	params = params || [];
+	console.log('QUERY > ',query.replace(/\s+/g,' '),JSON.stringify(params));
 	ctx.executeSql(query,params,
 		function(ctx,result){
 			console.log(result);
@@ -17998,13 +18277,9 @@ function query (ctx, callback, query) {
 	);
 }
 
-function insert (ctx, callback, query) {
-	var params = [];
-	if (query instanceof brick) {
-		params = query.params;
-		query = query.text;
-	}
-	console.log(query);
+function insert (ctx, callback, query, params) {
+	params = params || [];
+	console.log('INSERT > ',query.replace(/\s+/g,' '),JSON.stringify(params));
 	ctx.executeSql(query,params,
 		function (ctx, result) {
 			callback(result.insertId);
@@ -18086,15 +18361,14 @@ tables.clear = function (callback) {
 
 window.TABLES = tables;
 module.exports = tables;
-},{"./tables/log":33,"./tables/log_format":34,"./tables/model":35,"./tables/settings":36,"brick":1}],12:[function(require,module,exports){
-var brick = require('brick');
+},{"./tables/log":34,"./tables/log_format":35,"./tables/model":36,"./tables/settings":37}],12:[function(require,module,exports){
 var tables = require('./db-tables');
 var db = window.openDatabase('flightlog','1.0','Freeflight Log',20*1024*1024);
 
 tables.setDB(db);
 
 module.exports = tables;
-},{"./db-tables":11,"brick":1}],13:[function(require,module,exports){
+},{"./db-tables":11}],13:[function(require,module,exports){
 var ratchet = require('ratchet-npm/dist/js/ratchet');
 var url = require('url');
 var db = require('./db');
@@ -18115,7 +18389,22 @@ var route = {
 	'model': require('./routes/model'),
 	'flight': require('./routes/flight'),
 	'edit_flight': require('./routes/edit_flight'),
+	'log_format_edit' : require('./routes/log_format_edit'),
 	'timer': require('./routes/timer')
+}
+
+function topLevelError (err) {
+	var msg = err.message || err;
+	console.log('ERROR:', msg);
+
+	if (! msg.match(/Uncaught module cordova-plugin.+already defined/)) {
+		$('.content').html(`
+			<div>
+				<h1>ERROR</h1>
+				${msg}
+			</div>
+		`);
+	}
 }
 
 function loaded () {
@@ -18123,15 +18412,7 @@ function loaded () {
 
 	screen.orientation.lock('portrait');
 
-	window.onerror = function (err) {
-		console.log('ERROR:', err, err.message);
-		$('.content').html(`
-			<div>
-				<h1>ERROR</h1>
-				${err.message}
-			</div>
-		`);
-	}
+	window.onerror = topLevelError;
 	$(window).on('push', function (e) {
 		var pushUrl = url.parse(e.detail.state.url);
 		var path = pushUrl.pathname
@@ -18143,13 +18424,7 @@ function loaded () {
 			route[path](pushUrl,state);
 		}
 			catch(err) {
-				console.log('ERROR:', err, err.message);
-				$('.content').html(`
-					<div>
-						<h1>ERROR</h1>
-						${err.message}
-					</div>
-				`);
+				topLevelError(err);
 			}
 		}
 		
@@ -18165,6 +18440,19 @@ function loaded () {
 				e => $(e.target).focus()
 			)
 		);
+
+		[
+			'input[type="radio"]',
+			'label'
+		].forEach(
+			x => $(x).on('touchstart',
+				e => $(e.target).click()
+			)
+		);
+
+		$('div.radio').on('touchstart', e => {
+			$(e.target).find('input[type="radio"]').click()
+		})
 	});
 
 	PUSH({url: 'index.html'}) // Load landing page
@@ -18188,7 +18476,7 @@ var app = {
 
 app.initialize();
 
-},{"./db":12,"./routes/add_model":14,"./routes/edit_flight":15,"./routes/edit_model":16,"./routes/flight":17,"./routes/index":18,"./routes/log_formats":26,"./routes/model":27,"./routes/setting_selection":28,"./routes/settings":29,"./routes/timer":30,"jquery":2,"ratchet-npm/dist/js/ratchet":8,"url":9}],14:[function(require,module,exports){
+},{"./db":12,"./routes/add_model":14,"./routes/edit_flight":15,"./routes/edit_model":16,"./routes/flight":17,"./routes/index":18,"./routes/log_format_edit":26,"./routes/log_formats":27,"./routes/model":28,"./routes/setting_selection":29,"./routes/settings":30,"./routes/timer":31,"jquery":1,"ratchet-npm/dist/js/ratchet":8,"url":9}],14:[function(require,module,exports){
 var $ = require('jquery');
 var db = require('../db');
 var alert = require('./lib/alert');
@@ -18200,8 +18488,11 @@ module.exports = function (route, state) {
 	console.log('ADD MODEL CONTROLLER');
 
 	if (typeof state.selected_log_format == 'undefined') {
-		state.selected_log_format = 0;
+		state.selected_log_format = 1;
+		state.selected_log_format_name = 'Simple';
 	}
+
+	$('.log-format').text(state.selected_log_format_name);
 
 	state.previousPage = route.pathname;
 	
@@ -18236,7 +18527,6 @@ module.exports = function (route, state) {
 	page.handlePictureUpload(function(){
 		camera.getPicture(function(img){
 			var url = 'data:image/jpeg;base64,' + img;
-			console.log('image size=',url.length);
 			$('.plane-pic').attr('src', url);
 			$('.click-instruction').hide();
 		});
@@ -18246,7 +18536,7 @@ module.exports = function (route, state) {
 		console.log('save model');
 
 		var model = page.getValues();
-		console.log('log format=',state.selected_log_format);
+		console.log('log format=',state.selected_log_format, 'name=', state.selected_log_format_name);
 
 		if (model.name == "") {
 			alert.error('Please enter model name');
@@ -18257,10 +18547,11 @@ module.exports = function (route, state) {
 
 				model.meta = {
 					fields: format.fields,
-					format: state.selected_log_format_name
+					format: state.selected_log_format_name,
+					formatId: state.selected_log_format
 				};
 	
-				console.log('model=',model);
+				console.log('model=',JSON.stringify(model,null,2));
 
 				db.addModel(model,function(){
 					goBack();
@@ -18270,7 +18561,7 @@ module.exports = function (route, state) {
 	});
 }
 
-},{"../../templates/add_model":37,"../db":12,"./lib/alert":19,"./lib/camera":20,"./lib/onclick":24,"jquery":2}],15:[function(require,module,exports){
+},{"../../templates/add_model":38,"../db":12,"./lib/alert":19,"./lib/camera":20,"./lib/onclick":24,"jquery":1}],15:[function(require,module,exports){
 var $ = require('jquery');
 var db = require('../db');
 var alert = require('./lib/alert');
@@ -18326,7 +18617,7 @@ module.exports = function (route, state) {
 		})
 	})
 }
-},{"../../templates/edit_flight":38,"../db":12,"./lib/alert":19,"./lib/flight_common":22,"./lib/format":23,"./lib/onclick":24,"jquery":2,"moment":3}],16:[function(require,module,exports){
+},{"../../templates/edit_flight":39,"../db":12,"./lib/alert":19,"./lib/flight_common":22,"./lib/format":23,"./lib/onclick":24,"jquery":1,"moment":3}],16:[function(require,module,exports){
 var $ = require('jquery');
 var db = require('../db');
 var alert = require('./lib/alert');
@@ -18337,15 +18628,22 @@ var page = require('../../templates/edit_model');
 module.exports = function (route, state) {
 	console.log('EDIT MODEL CONTROLLER');
 
-	if (typeof state.selected_log_format == 'undefined') {
-		state.selected_log_format = 0;
-	}
-
 	state.previousPage = route.pathname;
 	
 	console.log(state);
 	
 	var model = state.selected_model;
+
+	if (typeof state.selected_log_format == 'undefined') {
+		if (model.meta.formatId) {
+			state.selected_log_format = model.meta.formatId;
+			state.selected_log_format_name = model.meta.format;
+		}
+		else {
+			state.selected_log_format = 1;
+			state.selected_log_format_name = 'Simple';
+		}
+	}
 
 	$('.title').text(model.name);
 	$('.log-format').text(state.selected_log_format_name || model.meta.format);
@@ -18409,7 +18707,8 @@ module.exports = function (route, state) {
 
 				formData.meta = {
 					fields: format.fields,
-					format: state.selected_log_format_name
+					format: state.selected_log_format_name,
+					formatId: state.selected_log_format
 				};
 	
 				console.log('model=',formData);
@@ -18422,7 +18721,7 @@ module.exports = function (route, state) {
 	});
 }
 
-},{"../../templates/edit_model":39,"../db":12,"./lib/alert":19,"./lib/camera":20,"./lib/onclick":24,"jquery":2}],17:[function(require,module,exports){
+},{"../../templates/edit_model":40,"../db":12,"./lib/alert":19,"./lib/camera":20,"./lib/onclick":24,"jquery":1}],17:[function(require,module,exports){
 var $ = require('jquery');
 var db = require('../db');
 var alert = require('./lib/alert');
@@ -18493,7 +18792,7 @@ module.exports = function (route, state) {
 	})
 }
 
-},{"../../templates/flight":40,"../db":12,"./lib/alert":19,"./lib/flight_common":22,"./lib/onclick":24,"jquery":2}],18:[function(require,module,exports){
+},{"../../templates/flight":41,"../db":12,"./lib/alert":19,"./lib/flight_common":22,"./lib/onclick":24,"jquery":1}],18:[function(require,module,exports){
 var $ = require('jquery');
 var db = require('../db');
 var alert = require('./lib/alert');
@@ -18505,11 +18804,8 @@ var page = require('../../templates/index');
 module.exports = function (route, state) {
 	console.log('LANDING PAGE');
 
-	if (typeof state.selected_log_format == 'undefined') {
-		state.selected_log_format = 0;
-	}
-
 	state.previousPage = route.pathname;
+	state.selected_log_format = undefined;
 	
 	console.log(state);
 	
@@ -18569,7 +18865,7 @@ module.exports = function (route, state) {
 	});
 }
 
-},{"../../templates/index":41,"../db":12,"./lib/alert":19,"./lib/onclick":24,"./lib/parallel":25,"jquery":2}],19:[function(require,module,exports){
+},{"../../templates/index":42,"../db":12,"./lib/alert":19,"./lib/onclick":24,"./lib/parallel":25,"jquery":1}],19:[function(require,module,exports){
 
 function alarm (type) {
 	return function (message, callback) {
@@ -18643,7 +18939,7 @@ module.exports = function (type) {
 	return checkSelection;
 }
 
-},{"jquery":2}],22:[function(require,module,exports){
+},{"jquery":1}],22:[function(require,module,exports){
 var $ = require('jquery');
 var db = require('../../db');
 var onclick = require('./onclick');
@@ -18787,7 +19083,7 @@ module.exports = {
 	showFields,
 	registerUnitSelection
 }
-},{"../../db":12,"./onclick":24,"jquery":2}],23:[function(require,module,exports){
+},{"../../db":12,"./onclick":24,"jquery":1}],23:[function(require,module,exports){
 const moment = require('moment');
 
 function duration (t,msDigits) {
@@ -18830,7 +19126,7 @@ module.exports = function (selector, callback) {
 		}
 	});
 }
-},{"jquery":2}],25:[function(require,module,exports){
+},{"jquery":1}],25:[function(require,module,exports){
 function parallel (jobs, callback) {
 	var count = jobs.length;
 	var result = [];
@@ -18851,6 +19147,43 @@ function parallel (jobs, callback) {
 
 module.exports = parallel;
 },{}],26:[function(require,module,exports){
+var $ = require('jquery');
+var db = require('../db');
+var alert = require('./lib/alert');
+var onclick = require('./lib/onclick');
+var camera = require('./lib/camera');
+var page = require('../../templates/add_model');
+
+module.exports = function (route, state) {
+	console.log('LOG FORMAT EDIT CONTROLLER',
+		state.selected_log_format,
+		state.selected_log_format_name
+	);
+
+	var rowid = state.selected_log_format;
+	$('.content').hide();
+
+	db.getFormatById(rowid, f => {
+		console.log(f);
+
+		$('input[name="name"]').val(state.selected_log_format_name);
+		f.fields.forEach(field => {
+			$('.' + field).addClass('active');
+			switch (field) {
+				case 'duration':
+					$('.distance').removeClass('active');
+					break;
+				case 'distance':
+					$('.duration').removeClass('active');
+					break;
+			}
+		});
+		$('.content').show();
+	})
+
+	onclick('#back', () => history.back());
+}
+},{"../../templates/add_model":38,"../db":12,"./lib/alert":19,"./lib/camera":20,"./lib/onclick":24,"jquery":1}],27:[function(require,module,exports){
 var $ = require('jquery');
 var checkSelection = require('./lib/check_selection')('log');
 var db = require('../db');
@@ -18888,7 +19221,7 @@ function saveSelectedFormat (selected, name, from, state, callback) {
 	switch (from) {
 		case '/settings':
 			db.setSetting('defaultFormat',selected.toString(),callback);
-			break;
+			// no break! continue to set state:
 		case '/edit_model':
 		case '/add_model':
 			state.selected_log_format = selected;
@@ -18916,6 +19249,10 @@ module.exports = function (route, state) {
 	
 		loadSelectedFormat(from, state, selectedFormat => {
 			checkSelection(selectedFormat);
+			state.selected_log_format = selectedFormat;
+			state.selected_log_format_name = formats
+				.filter(x => x.rowid == selectedFormat)
+				.map(x => x.name)[0];
 			
 			onclick('#back', function(){
 				console.log('back button');
@@ -18933,7 +19270,7 @@ module.exports = function (route, state) {
 	})
 }
 
-},{"../../templates/log_formats":42,"../db":12,"./lib/check_selection":21,"./lib/onclick":24,"jquery":2}],27:[function(require,module,exports){
+},{"../../templates/log_formats":43,"../db":12,"./lib/check_selection":21,"./lib/onclick":24,"jquery":1}],28:[function(require,module,exports){
 var $ = require('jquery');
 var db = require('../db');
 var alert = require('./lib/alert');
@@ -18952,6 +19289,7 @@ module.exports = function (route, state) {
 	function loadLogs (callback) {
 		db.logs(model.rowid, function(logs){
 			var fields = model.meta.fields;
+			db.sortByColumnDef(fields);
 			logs.reverse();
 
 			console.log('logs=',logs);
@@ -19087,7 +19425,7 @@ module.exports = function (route, state) {
 		});
 	})
 }
-},{"../../templates/model":43,"../db":12,"./lib/alert":19,"./lib/format":23,"./lib/onclick":24,"jquery":2,"moment":3}],28:[function(require,module,exports){
+},{"../../templates/model":44,"../db":12,"./lib/alert":19,"./lib/format":23,"./lib/onclick":24,"jquery":1,"moment":3}],29:[function(require,module,exports){
 var $ = require('jquery');
 var checkSelection = require('./lib/check_selection')('general');
 var db = require('../db');
@@ -19140,7 +19478,7 @@ module.exports = function (route, state) {
 	});
 }
 
-},{"../../templates/setting_selection":44,"../db":12,"./lib/check_selection":21,"./lib/onclick":24,"jquery":2}],29:[function(require,module,exports){
+},{"../../templates/setting_selection":45,"../db":12,"./lib/check_selection":21,"./lib/onclick":24,"jquery":1}],30:[function(require,module,exports){
 var $ = require('jquery');
 var db = require('../db');
 var alert = require('./lib/alert');
@@ -19228,7 +19566,7 @@ module.exports = function (route, state) {
 	});
 }
 
-},{"../../templates/settings":45,"../db":12,"./lib/alert":19,"./lib/onclick":24,"jquery":2}],30:[function(require,module,exports){
+},{"../../templates/settings":46,"../db":12,"./lib/alert":19,"./lib/onclick":24,"jquery":1}],31:[function(require,module,exports){
 var $ = require('jquery');
 var db = require('../db');
 var alert = require('./lib/alert');
@@ -19283,7 +19621,7 @@ module.exports = function (route, state) {
 	});
 }
 
-},{"../../templates/index":41,"../db":12,"./lib/alert":19,"./lib/format":23,"./lib/onclick":24,"jquery":2,"moment":3}],31:[function(require,module,exports){
+},{"../../templates/index":42,"../db":12,"./lib/alert":19,"./lib/format":23,"./lib/onclick":24,"jquery":1,"moment":3}],32:[function(require,module,exports){
 module.exports=[
 	{
 		"name": "Simple",
@@ -19322,7 +19660,7 @@ module.exports=[
 		}
 	}
 ]
-},{}],32:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 function flatten (column, callback) {
 	return function (result) {
 		callback(result[0][column]);
@@ -19330,76 +19668,106 @@ function flatten (column, callback) {
 }
 
 module.exports = flatten;
-},{}],33:[function(require,module,exports){
-var brick = require('brick');
+},{}],34:[function(require,module,exports){
+var types = [
+	{ name: 'model', type: 'INTEGER' },
+	{ name: 'timestamp', type: 'INTEGER' },
+	{ name: 'duration', type: 'INTEGER' },
+	{ name: 'distance', type: 'INTEGER' },
+	{ name: 'distance_unit', type: 'TEXT' },
+	{ name: 'windings', type: 'INTEGER' },
+	{ name: 'backoff', type: 'INTEGER' },
+	{ name: 'torque', type: 'DOUBLE' },
+	{ name: 'torque_unit', type: 'TEXT' },
+	{ name: 'rubber_length', type: 'TEXT' },
+	{ name: 'rubber_length_unit', type: 'TEXT' },
+	{ name: 'rubber_width', type: 'TEXT' },
+	{ name: 'rubber_width_unit', type: 'TEXT' },
+	{ name: 'rubber_weight', type: 'DOUBLE' },
+	{ name: 'rubber_weight_unit', type: 'TEXT' },
+	{ name: 'location', type: 'TEXT' },
+	{ name: 'notes', type: 'TEXT' }
+]
+
+var columns = types.map(t => t.name);
+
+var formats = columns.filter(x => !x.match(/_unit$/));
+
+var columnPriority = {};
+
+for (var i=0; i<columns.length; i++) {
+	columnPriority[columns[i]] = i;
+}
+
+function getValue(data, column) {
+	var val = data[column];
+	return val === undefined? '' : val;
+}
 
 module.exports = function (DB,q,i) {
 	
 	return {
 		name: 'log',
 		create: function (ctx) {
-			ctx.executeSql(`CREATE TABLE IF NOT EXISTS log (
-				model INTEGER,
-				timestamp INTEGER,
-				duration INTEGER,
-				distance INTEGER,
-				distance_unit TEXT,
-				location TEXT,
-				windings INTEGER,
-				backoff INTEGER,
-				torque DOUBLE,
-				torque_unit TEXT,
-				rubber_length TEXT,
-				rubber_length_unit TEXT,
-				rubber_width TEXT,
-				rubber_width_unit TEXT,
-				rubber_weight DOUBLE,
-				rubber_weight_unit TEXT,
-				notes TEXT
-			)`);
+			ctx.executeSql(
+				'CREATE TABLE IF NOT EXISTS log (' +
+					types.map(t => `${t.name} ${t.type}`).join(',') +
+				')'
+			);
 		},
 		methods: {
+			logColumnDef: function () {
+				return columns;
+			},
+			logFormatDef: function () {
+				return formats;
+			},
+			sortByColumnDef: function (arr) {
+				arr.sort((a,b) => {
+					return columnPriority[a] - columnPriority[b];
+				});
+			},
 			logs: function (model_id, callback) {
 				DB.transaction(function(ctx){
-					q(ctx, callback,brick(`
+					q(ctx, callback,`
 						SELECT
 							rowid,
 							*
 						FROM log
 							where model = ?
 						`,
-						model_id
-					));
+						[ model_id ]
+					);
 				});
 			},
 			getLogById: function (rowid, callback) {
 				DB.transaction(function(ctx){
-					q(ctx, row => callback(row[0]),brick(`
+					q(ctx, row => callback(row[0]),`
 						SELECT
 							rowid,
 							*
 						FROM log
 							where rowid = ?
 						`,
-						rowid
-					));
+						[ rowid ]
+					);
 				});
 			},
 			getLocations: function(callback) {
 				DB.transaction(function(ctx){
 					q(ctx, function(r){
 						callback(r.map(function(x){return x.location}));
-					}, brick(`
+					}, `
 						SELECT DISTINCT 
 							location
 						FROM log
 						`
-					));
+					);
 				});
 			},
 			getLogCount: function (callback) {
 				DB.transaction(function(ctx){
-					q(ctx, callback, brick(`
+					q(ctx, callback, `
 						SELECT
 							model, 
 							count(rowid) as logs
@@ -19407,88 +19775,63 @@ module.exports = function (DB,q,i) {
 						GROUP BY
 							model
 						`
-					));
+					);
 				});
 			},
 			deleteLogByModel: function(model_id, callback) {
 				DB.transaction(function(ctx){
-					q(ctx, callback, brick(`
+					q(ctx, callback, `
 						DELETE FROM log
 						WHERE
 							model = ?
 						`,
-						model_id
-					));
+						[ model_id ]
+					);
 				});
 			},
 			addLog: function (data, callback) {
+				var query = 'INSERT INTO log (' + 
+						columns.map(c => c).join(',') +
+					') VALUES (' + 
+						columns.map(() => '?').join(',') +
+					')';
+
+				var params = columns.map(c => getValue(data,c));
+
 				DB.transaction(function(ctx){
-					i(ctx, callback,
-						brick('INSERT INTO log VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
-							data.model,
-							data.timestamp,
-							data.duration,
-							data.distance,
-							data.distance_unit,
-							data.location,
-							data.windings,
-							data.backoff,
-							data.torque,
-							data.torque_unit,
-							data.rubber_length,
-							data.rubber_length_unit,
-							data.rubber_width,
-							data.rubber_width_unit,
-							data.rubber_weight,
-							data.rubber_weight_unit,
-							data.notes
-						)
-					);
+					i(ctx, callback, query, params);
 				});
 			},
 			saveLog: function (rowid, data, callback) {
+				var updates = columns.filter(c => {
+					switch (c) {
+						case 'model':
+						case 'timestamp':
+						case 'duration':
+						case 'distance':
+						case 'distance_unit':
+							return false;
+						default:
+							return true;
+					}
+				});
+
+				var query = 'UPDATE log SET ' + 
+						updates.map(c => c + ' = ?').join(',') +
+					' WHERE rowid = ?';
+
+				var params = updates.map(c => getValue(data,c));
+				params.push(rowid);
+
 				DB.transaction(function(ctx){
-					q(ctx, callback,
-						brick(`
-							UPDATE log
-							SET
-								location = ?,
-								windings = ?,
-								backoff = ?,
-								torque = ?,
-								torque_unit = ?,
-								rubber_length = ?,
-								rubber_length_unit = ?,
-								rubber_width = ?,
-								rubber_width_unit = ?,
-								rubber_weight = ?,
-								rubber_weight_unit = ?,
-								notes = ?
-							WHERE rowid = ?
-						`,
-							data.location,
-							data.windings,
-							data.backoff,
-							data.torque,
-							data.torque_unit,
-							data.rubber_length,
-							data.rubber_length_unit,
-							data.rubber_width,
-							data.rubber_width_unit,
-							data.rubber_weight,
-							data.rubber_weight_unit,
-							data.notes,
-							rowid
-						)
-					);
+					q(ctx, callback, query, params);
 				});
 			}
 		}
 	}
 }
 
-},{"brick":1}],34:[function(require,module,exports){
-var brick = require('brick');
+},{}],35:[function(require,module,exports){
 var formats = require('./lib/built_in_log_formats.json');
 var flatten = require('./lib/flatten');
 
@@ -19496,12 +19839,9 @@ module.exports = function (DB,q,i) {
 	
 	function initLogFormat (ctx) {
 		formats.forEach(function(f){
-			var q = brick('INSERT INTO log_format VALUES (?,?)',
-				f.name,
-				JSON.stringify(f.meta)
-			).build();
-			console.log(q.text);
-			ctx.executeSql(q.text,q.params);
+			var query = 'INSERT INTO log_format VALUES (?,?)';
+			var params = [ f.name, JSON.stringify(f.meta) ];
+			ctx.executeSql(query,params);
 		});
 	}
 	
@@ -19556,7 +19896,8 @@ module.exports = function (DB,q,i) {
 			getFormatName: function (rowid, callback) {
 				DB.transaction(function(ctx){
 					q(ctx,flatten('name',callback),
-						brick('SELECT name FROM log_format where rowid = ?',rowid)
+						'SELECT name FROM log_format where rowid = ?',
+						[ rowid ]
 					);
 				});
 			},
@@ -19565,7 +19906,8 @@ module.exports = function (DB,q,i) {
 					q(ctx,flatten('meta',function(meta){
 						callback(JSON.parse(meta));
 					}),
-						brick('SELECT meta FROM log_format where rowid = ?',rowid)
+						'SELECT meta FROM log_format where rowid = ?',
+						[ rowid ]
 					);
 				});
 			}
@@ -19573,14 +19915,25 @@ module.exports = function (DB,q,i) {
 	}
 }
 
-},{"./lib/built_in_log_formats.json":31,"./lib/flatten":32,"brick":1}],35:[function(require,module,exports){
-var brick = require('brick');
+},{"./lib/built_in_log_formats.json":32,"./lib/flatten":33}],36:[function(require,module,exports){
+const lz = require('lz-string');
 
 function unpackMeta (callback) {
 	return function (results) {
 		var rows = [].slice.call(results);
 		callback(rows.map(x => {
 			x.meta = JSON.parse(x.meta);
+			return x;
+		}));
+	}
+}
+
+function decompressPicture (callback) {
+	return function (results) {
+		callback(results.map(x => {
+			if (x.picture.match(/^lz:/)) {
+				x.picture = lz.decompressFromUTF16(x.picture.substr(3));
+			}
 			return x;
 		}));
 	}
@@ -19601,29 +19954,44 @@ module.exports = function (DB,q,i) {
 		methods: {
 			models: function (callback) {
 				DB.transaction(function(ctx){
-					q(ctx,unpackMeta(callback),
+					q(ctx,decompressPicture(unpackMeta(callback)),
 						'SELECT rowid, * FROM model'
 					);
 				});
 			},
 			addModel: function (data, callback) {
+				console.log('picture size=',data.picture.length);
+
+				if (data.picture.length > 100) {
+					data.picture = 'lz:' + lz.compressToUTF16(data.picture);
+					console.log('compressed picture size =', data.picture.length);
+				}
+
 				DB.transaction(function(ctx){
 					var meta = JSON.stringify(data.meta) || "{}";
 					i(ctx, callback,
-						brick('INSERT INTO model VALUES (?,?,?,?)',
+						'INSERT INTO model VALUES (?,?,?,?)',
+						[
 							data.name,
 							data.notes,
 							data.picture,
 							meta
-						)
+						]
 					);
 				});
 			},
 			saveModel: function (id, data, callback) {
+				console.log('picture size=',data.picture.length);
+
+				if (data.picture.length > 100) {
+					data.picture = 'lz:' + lz.compressToUTF16(data.picture);
+					console.log('compressed picture size =', data.picture.length);
+				}
+
 				DB.transaction(function(ctx){
 					var meta = JSON.stringify(data.meta) || "{}";
 					q(ctx, callback,
-						brick(`
+						`
 							UPDATE model
 							SET
 								name = ?,
@@ -19633,19 +20001,21 @@ module.exports = function (DB,q,i) {
 							WHERE
 								rowid = ?
 						`,
+						[
 							data.name,
 							data.notes,
 							data.picture,
 							meta,
 							id
-						)
+						]
 					);
 				});
 			},
 			deleteModelById: function (id, callback) {
 				DB.transaction(function(ctx){
 					q(ctx,callback,
-						brick('DELETE FROM model where rowid = ?', id)
+						'DELETE FROM model where rowid = ?',
+						[ id ]
 					);
 				});
 			}
@@ -19653,8 +20023,7 @@ module.exports = function (DB,q,i) {
 	}
 }
 
-},{"brick":1}],36:[function(require,module,exports){
-var brick = require('brick');
+},{"lz-string":2}],37:[function(require,module,exports){
 var flatten = require('./lib/flatten');
 
 var settings = [
@@ -19680,12 +20049,12 @@ module.exports = function (DB,q,i) {
 	
 	function initSettings (ctx) {
 		settings.forEach(function(f){
-			var q = brick('INSERT INTO settings VALUES (?,?)',
+			var query = 'INSERT INTO settings VALUES (?,?)';
+			var params = [
 				f.name,
 				f.value
-			).build();
-			console.log(q.text);
-			ctx.executeSql(q.text,q.params);
+			];
+			ctx.executeSql(query,params);
 		});
 	}
 	
@@ -19736,16 +20105,19 @@ module.exports = function (DB,q,i) {
 			getSetting: function (name,callback) {
 				DB.transaction(function(ctx){
 					q(ctx,flatten('value',callback),
-						brick('SELECT value FROM settings WHERE name = ?',name)
+						'SELECT value FROM settings WHERE name = ?',
+						[ name ]
 					);
 				});
 			},
 			setSetting: function (name, value,callback) {
 				DB.transaction(function(ctx){
 					q(ctx,callback,
-						brick('UPDATE settings SET value = ? WHERE name = ?',
-							value,name
-						)
+						'UPDATE settings SET value = ? WHERE name = ?',
+						[
+							value,
+							name
+						]
 					);
 				});
 			}
@@ -19753,7 +20125,7 @@ module.exports = function (DB,q,i) {
 	}
 }
 
-},{"./lib/flatten":32,"brick":1}],37:[function(require,module,exports){
+},{"./lib/flatten":33}],38:[function(require,module,exports){
 // Viewmodel for add_model page
 var $ = require('jquery');
 var onclick = require('../js/routes/lib/onclick');
@@ -19775,7 +20147,7 @@ module.exports = {
 	}
 }
 
-},{"../js/routes/lib/onclick":24,"jquery":2}],38:[function(require,module,exports){
+},{"../js/routes/lib/onclick":24,"jquery":1}],39:[function(require,module,exports){
 // Viewmodel for flight page
 var $ = require('jquery');
 var onclick = require('../js/routes/lib/onclick');
@@ -19798,7 +20170,7 @@ module.exports = {
 		}
 	}
 }
-},{"../js/routes/lib/onclick":24,"jquery":2}],39:[function(require,module,exports){
+},{"../js/routes/lib/onclick":24,"jquery":1}],40:[function(require,module,exports){
 // Viewmodel for add_model page
 var $ = require('jquery');
 var onclick = require('../js/routes/lib/onclick');
@@ -19827,7 +20199,7 @@ module.exports = {
 	}
 }
 
-},{"../js/routes/lib/onclick":24,"jquery":2}],40:[function(require,module,exports){
+},{"../js/routes/lib/onclick":24,"jquery":1}],41:[function(require,module,exports){
 // Viewmodel for flight page
 var $ = require('jquery');
 var onclick = require('../js/routes/lib/onclick');
@@ -19850,11 +20222,11 @@ module.exports = {
 		}
 	}
 }
-},{"../js/routes/lib/onclick":24,"jquery":2}],41:[function(require,module,exports){
+},{"../js/routes/lib/onclick":24,"jquery":1}],42:[function(require,module,exports){
 // Generic viewmodel for all pages
 
 module.exports = {}
-},{}],42:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 // Viewmodel for log_formats page
 var $ = require('jquery');
 
@@ -19874,9 +20246,9 @@ module.exports = {
 	}
 }
 
-},{"jquery":2}],43:[function(require,module,exports){
+},{"jquery":1}],44:[function(require,module,exports){
 
-},{}],44:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 // Viewmodel for log_formats page
 var $ = require('jquery');
 
@@ -19899,7 +20271,7 @@ module.exports = {
 	}
 }
 
-},{"jquery":2}],45:[function(require,module,exports){
+},{"jquery":1}],46:[function(require,module,exports){
 // Viewmodel for settings page
 
 module.exports = {}
