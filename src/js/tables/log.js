@@ -114,7 +114,7 @@ module.exports = function (DB,q,i) {
 						WHERE
 							model = ?
 						`,
-						model_id
+						[ model_id ]
 					);
 				});
 			},

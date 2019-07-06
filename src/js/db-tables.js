@@ -8,7 +8,7 @@
 
 function query (ctx, callback, query, params) {
 	params = params || [];
-	console.log('QUERY > ',query.replace(/\s+/g,' '));
+	console.log('QUERY > ',query.replace(/\s+/g,' '),JSON.stringify(params));
 	ctx.executeSql(query,params,
 		function(ctx,result){
 			console.log(result);
@@ -29,7 +29,7 @@ function query (ctx, callback, query, params) {
 
 function insert (ctx, callback, query, params) {
 	params = params || [];
-	console.log('INSERT > ',query.replace(/\s+/g,' '));
+	console.log('INSERT > ',query.replace(/\s+/g,' '),JSON.stringify(params));
 	ctx.executeSql(query,params,
 		function (ctx, result) {
 			callback(result.insertId);
