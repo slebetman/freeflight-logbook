@@ -18,8 +18,15 @@ module.exports = function (route, state) {
 		console.log(f);
 
 		$('input[name="name"]').val(state.selected_log_format_name);
+		if (rowid <=3) {
+			$('.toggle').hide();
+			$('.settings-check').show();
+			$('input').prop('readonly', 'readonly');
+			$('.control-item.distance').hide();
+		}
 		f.fields.forEach(field => {
 			$('.' + field).addClass('active');
+			$('.' + field + ' span.icon').addClass('icon-check');
 			switch (field) {
 				case 'duration':
 					$('.distance').removeClass('active');
