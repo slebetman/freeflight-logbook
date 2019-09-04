@@ -12,7 +12,7 @@ module.exports = function (route, state) {
 	);
 
 	var rowid = state.selected_log_format;
-	$('.content').hide();
+	$('.log-format-editor').hide();
 
 	db.getFormatById(rowid, f => {
 		console.log(f);
@@ -36,7 +36,7 @@ module.exports = function (route, state) {
 					break;
 			}
 		});
-		$('.content').show();
+		$('.log-format-editor').show();
 	})
 
 	onclick('#back', () => history.back());

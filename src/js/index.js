@@ -19,6 +19,7 @@ var route = {
 	'flight': require('./routes/flight'),
 	'edit_flight': require('./routes/edit_flight'),
 	'log_format_edit' : require('./routes/log_format_edit'),
+	'log_format_add' : require('./routes/log_format_add'),
 	'timer': require('./routes/timer')
 }
 
