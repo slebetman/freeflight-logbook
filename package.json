@@ -26,7 +26,7 @@
         "cordova-plugin-media-capture": "~1.4.3",
         "handlebars": "^4.4.5",
         "handlebars-generator": "^3.2.3",
-        "jquery": "^3.4.1",
+        "jquery": "^3.5.0",
         "less": "^3.9.0",
         "less-plugin-npm-import": "^2.1.0",
         "mkdirp": "^0.5.1",
